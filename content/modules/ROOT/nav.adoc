@@ -1,7 +1,12 @@
-* xref:module-01.adoc[1. RPM Native Container]
-** xref:module-01.adoc#repositories[Repositories]
-** xref:module-01.adoc#software[Software]
+* xref:module-00.adoc[Prerequisites]
+* xref:beginner-01.adoc[1. Beginner]
+** xref:beginner-01-helloworld.adoc[Llama-stack Helloworld]
+** xref:beginner-01-cli.adoc[Llama-stack CLI]
+** xref:beginner-01-playground.adoc[Llama-stack Playground]
+** xref:beginner-01-python-programming.adoc[Llama-stack Python programming]
 
-* xref:module-02.adoc[2. GitHub Sourced Container]
-** xref:module-02.adoc#prerequisites[Install Prerequisites]
-** xref:module-02.adoc#container[Enable Container]
+
+* xref:elementary-02.adoc[2. Elementary]
+* xref:intermediate-03.adoc[3. Intermediate]
+* xref:advaned-04.adoc[4. Advanced]
+

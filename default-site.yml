@@ -1,6 +1,6 @@
 ---
 site:
-  title: Showroom Template Demo
+  title: Llama-stack Tutorial
   url: https://redhat-scholars.github.io/course-template
   start_page: modules::index.adoc
 
