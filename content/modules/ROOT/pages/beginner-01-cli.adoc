@@ -1,3 +1,160 @@
-= Beginner - CLI
+= Llama-stack CLI
+:page-layout: lab
+:experimental:
 
-TBD
+== Goal
+
+This module introduces the `llama-stack-client` command-line interface (CLI), which allows you to interact with the Llama Stack server without writing any code. You will learn how to list models, run inferences, inspect the server, and more.
+
+== Prerequisites
+
+* Llama Stack server running (see: xref:beginner-01-helloworld.adoc[Llama-stack Helloworld])
+* Python 3.10+ (to install the CLI tool)
+
+== Step 1: Install the CLI
+
+First, set up a virtual environment (optional but recommended):
+
+[source,sh,role=execute]
+----
+python -m venv llama_env
+source llama_env/bin/activate
+----
+
+Install the CLI via pip:
+
+[source,sh,role=execute]
+----
+pip install llama-stack-client
+----
+
+== Step 2: Configure the CLI
+
+Run the following to configure the endpoint for your Llama Stack server:
+
+[source,sh,role=execute]
+----
+llama-stack-client configure
+----
+
+Example interaction:
+
+[source,txt]
+----
+> Enter the endpoint of the Llama Stack distribution server: http://localhost:8321
+
+Done! You can now use the Llama Stack Client CLI with endpoint http://localhost:8321
+----
+
+== Step 3: List Available Models
+
+You can use the CLI to view models registered with the server:
+
+[source,sh,role=execute]
+----
+llama-stack-client models list
+----
+
+Example output:
+
+[source,txt]
+----
+┏━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━┓
+┃ model_type   ┃ identifier                           ┃ provider_resource_id         ┃ metadata  ┃ provider_id ┃
+┡━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━┩
+│ llm          │ meta-llama/Llama-3.2-3B-Instruct     │ llama3.2:3b-instruct-fp16    │           │ ollama      │
+└──────────────┴──────────────────────────────────────┴──────────────────────────────┴───────────┴─────────────┘
+----
+
+== Step 4: Run an Inference
+
+Send a message to the model using this command:
+
+[source,sh,role=execute]
+----
+llama-stack-client \
+  inference chat-completion \
+  --message "hello, what model are you?" \
+  --model-id "meta-llama/Llama-3.2-3B-Instruct"
+----
+
+Example output (this will be different to your response, this is an LLM response after all!):
+
+[source,txt]
+----
+ChatCompletionResponse(completion_message=CompletionMessage(
+    content="Hello! I'm a Meta LLaMA 3.2 3B Instruct model. How can I assist you today?",
+    role='assistant',
+    stop_reason='end_of_turn',
+    tool_calls=[]),
+    logprobs=None,
+    metrics=[
+        Metric(metric='prompt_tokens', value=12.0, unit=None),
+        Metric(metric='completion_tokens', value=24.0, unit=None),
+        Metric(metric='total_tokens', value=36.0, unit=None)
+    ]
+)
+----
+
+== Step 5: Inspect Server Info
+
+You can inspect the current server configuration and metadata:
+
+[source,sh,role=execute]
+----
+llama-stack-client inspect version
+----
+
+Sample output:
+
+[source,sh]
+----
+VersionInfo(version='0.1.8')
+----
+
+== Step 6: List Providers
+
+View a list of providers registered in your Llama Stack environment:
+
+[source,sh,role=execute]
+----
+llama-stack-client providers list
+----
+
+Sample output:
+
+[source,txt]
+----
+┏━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ API          ┃ Provider ID            ┃ Provider Type                  ┃
+┡━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ inference    │ ollama                 │ remote::ollama                 │
+│ vector_io    │ faiss                  │ inline::faiss                  │
+│ safety       │ llama-guard            │ inline::llama-guard            │
+│ agents       │ meta-reference         │ inline::meta-reference         │
+│ telemetry    │ meta-reference         │ inline::meta-reference         │
+│ eval         │ meta-reference         │ inline::meta-reference         │
+│ datasetio    │ huggingface            │ remote::huggingface            │
+│ datasetio    │ localfs                │ inline::localfs                │
+│ scoring      │ basic                  │ inline::basic                  │
+│ scoring      │ llm-as-judge           │ inline::llm-as-judge           │
+│ scoring      │ braintrust             │ inline::braintrust             │
+│ tool_runtime │ brave-search           │ remote::brave-search           │
+│ tool_runtime │ tavily-search          │ remote::tavily-search          │
+│ tool_runtime │ code-interpreter       │ inline::code-interpreter       │
+│ tool_runtime │ rag-runtime            │ inline::rag-runtime            │
+│ tool_runtime │ model-context-protocol │ remote::model-context-protocol │
+│ tool_runtime │ wolfram-alpha          │ remote::wolfram-alpha          │
+└──────────────┴────────────────────────┴────────────────────────────────┘
+----
+
+== Summary
+
+In this module, you:
+
+* Installed and configured the `llama-stack-client` CLI
+* Listed available models and providers
+* Ran your first LLM inference with a single command
+* Inspected server metadata using built-in tools
+
+Next, try using xref:beginner-01-playground.adoc[Llama-stack Playground] for an interactive Jupyter-based experience.
