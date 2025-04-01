@@ -23,7 +23,7 @@ ollama serve
 
 Leave this terminal open and running.
 
-== Step 2: Load the Model with Keepalive
+== Step 2: Load the Model
 
 Llama Stack does not dynamically load models from Ollama. You need to preload and keep the model in memory.
 
