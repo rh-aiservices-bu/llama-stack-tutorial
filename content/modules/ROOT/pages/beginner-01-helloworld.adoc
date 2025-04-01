@@ -4,13 +4,13 @@
 
 == Goal
 
-In this module, you will launch the Llama Stack server using a model served by Ollama, and make your first LLM request using the Llama Stack Python SDK.
+In this module, you will launch the Llama Stack server using a model served by Ollama, and make your first LLM request using the `llama-stack-client` CLI.
 
 == Prerequisites
 
 * Ollama installed on your local machine (https://ollama.com/download)
 * Docker or Podman installed
-* Python 3.10+
+* Python 3.10+ (only for installing the CLI)
 
 == Step 1: Start the Ollama Server
 
@@ -72,7 +72,7 @@ podman run -it \
 
 The Llama Stack server will start and listen on port `8321`.
 
-== Step 4: Hello World with the Python SDK
+== Step 4: Hello World with the CLI
 
 Create and activate a Python virtual environment:
 
@@ -82,50 +82,49 @@ python -m venv llama_env
 source llama_env/bin/activate
 ----
 
-Install the Llama Stack client SDK:
+Install the Llama Stack client CLI:
 
 [source,sh,role=execute]
 ----
 pip install llama-stack-client
 ----
 
-Create a Python script named `hello_llama.py`:
-
-[source,python,role=execute]
-----
-cat << 'EOF' > hello_llama.py
-from llama_stack_client import LlamaStackClient
-
-client = LlamaStackClient(base_url="http://localhost:8321")
-
-response = client.inference.chat_completion(
-    messages=[{"role": "user", "content": "Hello, Llama Stack!"}],
-    model_id="meta-llama/Llama-3.2-3B-Instruct"
-)
-
-print("Model Response:")
-print(response.completion_message.content)
-
-EOF
-
-----
-
-Run the script:
+Configure the CLI to point to your running server:
 
 [source,sh,role=execute]
 ----
-python hello_llama.py
+llama-stack-client configure --endpoint http://localhost:8321
 ----
 
-You should get a simple response similar to:
+Now, send your first prompt using the CLI:
+
+[source,sh,role=execute]
+----
+llama-stack-client \
+  inference chat-completion \
+  --message "hello, what model are you?" \
+  --model-id "meta-llama/Llama-3.2-3B-Instruct"
+----
+
+== Sample Output
 
 [source,txt]
 ----
-Model Response:
-Hello! It's nice to meet you. Is there something I can help you with or would you like to chat?
+ChatCompletionResponse(completion_message=CompletionMessage(
+    content="Hello! I'm a Meta LLaMA 3.2 3B Instruct model. How can I assist you today?",
+    role='assistant',
+    stop_reason='end_of_turn',
+    tool_calls=[]),
+    logprobs=None,
+    metrics=[
+        Metric(metric='prompt_tokens', value=12.0, unit=None),
+        Metric(metric='completion_tokens', value=24.0, unit=None),
+        Metric(metric='total_tokens', value=36.0, unit=None)
+    ]
+)
 ----
 
-This shows a typical response from the model. You can expect variations depending on the version, temperature settings, or prompt phrasing.
+This shows a typical structured response from the model via the CLI. You may see different content depending on model version and configuration.
 
 == Summary
 
@@ -133,6 +132,6 @@ You have:
 
 * Started Ollama and preloaded the Llama 3.2 3B model
 * Launched the Llama Stack server in a container
-* Sent a basic prompt using the Python SDK
+* Sent a basic prompt using the Llama Stack CLI
 
-You are now ready to build more advanced Llama Stack applications!
+You are now ready to build more advanced Llama Stack applications using either the CLI or Python SDK!
