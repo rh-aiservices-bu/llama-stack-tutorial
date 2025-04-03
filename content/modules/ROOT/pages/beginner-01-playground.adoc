@@ -1,65 +1,51 @@
-= Llama-stack Playground
+= Llama-Stack Playground
 :page-layout: lab
 :experimental:
 
 == Goal
 
-This module introduces the Llama-Stack Dashboard,  a simple interface designed to showcase the capabilities and concepts of Llama Stack in an interactive environment. 
-
-It provides a UI for inspecting and understanding Llama Stack API providers and resources. Additionally, it includes end-to-end application code to help users get started with building their own applications.
+This module introduces the **Llama-Stack Dashboard**, a user-friendly interface designed to demonstrate the core capabilities of Llama Stack in an interactive environment.
+The dashboard allows you to inspect API providers and resources exposed by Llama Stack.
 
 == Prerequisites
 
-* Llama Stack server running (see: xref:beginner-01-helloworld.adoc[Llama-stack Helloworld])
-* Python 3.10+ (to install the CLI tool)
+Before starting, ensure you have the following:
 
-== Step 1: Install the LLama-Stack Dashboard
+* A running Llama Stack server (see: xref:beginner-01-helloworld.adoc[Llama-Stack Hello World])
+* Python 3.10 or newer (to install and run the CLI tools)
 
-First, set up a virtual environment (optional but recommended):
+== Step 1: Deploy the Llama-Stack Dashboard
 
-[source,sh,role=execute]
-----
-python -m venv llama_env
-source llama_env/bin/activate
-----
-
-Clone the repository and install the Llama-Stack Dashboard dependencies via pip:
+You can deploy the dashboard using the https://llama-stack.readthedocs.io/en/latest/playground/index.html[source code] or run the pre-built container image from Quay.io:
 
 [source,sh,role=execute]
 ----
-git clone https://github.com/meta-llama/llama-stack.git
-pip install -r requirements.txt
-pip install llama_stack
+podman run -p 8501:8501 \
+  -e LLAMA_STACK_ENDPOINT=http://host.containers.internal:8321 \
+  quay.io/rh-aiservices-bu/llama-stack-playground:0.1.9
 ----
 
-== Step 2: Run the LLama-Stack Dashboard
+Once the container is running, the Llama-Stack Dashboard will be available at `http://localhost:8501`.
 
-Start Llama-Stack Dashboard based in the Streamlit UI:
+== Step 2: Interact with the Dashboard Chat
 
-[source,sh,role=execute]
-----
-streamlit run app.py
-----
+The Llama-Stack Dashboard is built with Streamlit and includes a chat interface for interacting with the Llama Stack server.
 
-Automatically, the Llama-Stack Dashboard will be available at `http://localhost:8501`. If not, open your web browser and navigate to `http://localhost:8501` to access the Llama-Stack Dashboard.
-
-== Step 3: Test the LLama-Stack Dashboard Chat
-
-You should see a chat interface where you can interact with the Llama Stack server.
+Open your browser and navigate to `http://localhost:8501`. You’ll see a chat interface where you can enter prompts and receive responses from the deployed LLM model.
 
 image::../assets/images/llama-stack-dashboard.png[Llama-Stack Dashboard, width=800]
 
-You can enter text prompts and receive responses from the LLM model deployed.
+== Step 3: Explore the Dashboard
 
-== Step 4: Explore the LLama-Stack Dashboard
+The dashboard also allows you to explore available resources, such as models, vector databases, and shields.
 
-The Llama-Stack Dashboard provides a user-friendly interface to explore the available models and providers. You can inspect the models, their configurations, and the providers they are associated with.
+To browse these:
 
-To view the available Models, Vector Databases, Shields and others , click on the "Resources" tab in the Llama-Stack Dashboard:
+* Click the "Resources" tab to view all registered components in your Llama Stack setup.
 
 image::../assets/images/llama-stack-dashboard3.png[Resources, width=800]
 
-On the other hand you can also view the available API providers available in the Llama-Stack Dashboard by clicking on the "API Providers" tab:
+* Click the "API Providers" tab to inspect configured model and embedding providers.
 
 image::../assets/images/llama-stack-dashboard2.png[API Providers, width=800]
 
@@ -67,9 +53,8 @@ image::../assets/images/llama-stack-dashboard2.png[API Providers, width=800]
 
 In this module, you:
 
-* Installed and deployed the Llama-Stack Dashboard
-* Explored the chat interface to interact with the LLM model
-* Used the Llama-Stack Dashboard to inspect available models and providers
+* Deployed and launched the Llama-Stack Dashboard
+* Interacted with the LLM model through the chat interface
+* Explored available models, providers, and other resources
 
-Next, try using xref:beginner-01-python-programming.adoc[Llama-stack Python Programming] for test your first python program with Llama-Stack.
-
+Next, continue with xref:beginner-01-python-programming.adoc[Llama-Stack Python Programming] to write and run your first Python program using Llama Stack.
