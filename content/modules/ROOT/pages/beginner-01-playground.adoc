@@ -14,9 +14,9 @@ Before starting, ensure you have the following:
 * A running Llama Stack server (see: xref:beginner-01-helloworld.adoc[Llama-Stack Hello World])
 * Python 3.10 or newer (to install and run the CLI tools)
 
-== Step 1: Deploy the Llama-Stack Dashboard
+== Step 1: Deploy the Llama-Stack Playground
 
-You can deploy the dashboard using the https://llama-stack.readthedocs.io/en/latest/playground/index.html[source code] or run the pre-built container image from Quay.io:
+You can deploy the playground using the https://llama-stack.readthedocs.io/en/latest/playground/index.html[source code] or run the pre-built container image from Quay.io:
 
 [source,sh,role=execute]
 ----
@@ -25,29 +25,29 @@ podman run -p 8501:8501 \
   quay.io/rh-aiservices-bu/llama-stack-playground:0.1.9
 ----
 
-Once the container is running, the Llama-Stack Dashboard will be available at `http://localhost:8501`.
+Once the container is running, the Llama-Stack playground will be available at `http://localhost:8501`.
 
-== Step 2: Interact with the Dashboard Chat
+== Step 2: Interact with the Playground Chat
 
-The Llama-Stack Dashboard is built with Streamlit and includes a chat interface for interacting with the Llama Stack server.
+The Llama-Stack Playground is built with Streamlit and includes a chat interface for interacting with the Llama Stack server.
 
 Open your browser and navigate to `http://localhost:8501`. You’ll see a chat interface where you can enter prompts and receive responses from the deployed LLM model.
 
-image::../assets/images/llama-stack-dashboard.png[Llama-Stack Dashboard, width=800]
+image::llama-stack-dashboard.png[Llama-Stack Dashboard, width=800]
 
-== Step 3: Explore the Dashboard
+== Step 3: Explore the Playground
 
-The dashboard also allows you to explore available resources, such as models, vector databases, and shields.
+The playground also allows you to explore available resources, such as models, vector databases, and shields.
 
 To browse these:
 
 * Click the "Resources" tab to view all registered components in your Llama Stack setup.
 
-image::../assets/images/llama-stack-dashboard3.png[Resources, width=800]
+image::llama-stack-dashboard3.png[Resources, width=800]
 
 * Click the "API Providers" tab to inspect configured model and embedding providers.
 
-image::../assets/images/llama-stack-dashboard2.png[API Providers, width=800]
+image::llama-stack-dashboard2.png[API Providers, width=800]
 
 == Summary
 
