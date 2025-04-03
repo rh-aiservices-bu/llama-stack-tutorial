@@ -71,5 +71,5 @@ In this module, you:
 * Explored the chat interface to interact with the LLM model
 * Used the Llama-Stack Dashboard to inspect available models and providers
 
-Next, try using xref:beginner-01-playground.adoc[Llama-stack Playground] for an interactive Jupyter-based experience.
+Next, try using xref:beginner-01-python-programming.adoc[Llama-stack Python Programming] for test your first python program with Llama-Stack.
 
