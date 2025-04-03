@@ -56,7 +56,7 @@ while True:
     print("Llama:", response.completion_message.content)
 EOF
 ----
-This script initializes the Llama Stack client, sends a message to the specified model, and prints the model's response.&#8203;:contentReference[oaicite:2]{index=2}
+This script initializes the Llama Stack client, and allows you to chat with the model.  Enter "exit" or "quit" to stop the application.
 
 == Step 4: Run the Python Script
 
