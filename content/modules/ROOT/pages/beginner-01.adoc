@@ -11,16 +11,16 @@ In this section, you'll get hands-on experience with the core components of the 
 This sections is broken into four beginner-friendly modules:
 
 * xref:beginner-01-helloworld.adoc[Llama-stack Helloworld] +
-  Learn how to run the Llama Stack server using a model served by Ollama and test it using a simple Python script. This is your first look at how the stack operates.
+  Learn how to run the Llama Stack server using a model served by Ollama and test it using the Llama Stack CLI. This is your first look at how the stack operates.
 
 * xref:beginner-01-cli.adoc[Llama-stack CLI] +
   Explore how to interact with Llama Stack using the command-line interface. You'll learn how to list models, run inferences, and inspect responses directly from your terminal.
 
 * xref:beginner-01-playground.adoc[Llama-stack Playground] +
-  Use a Jupyter Notebook environment to interact with Llama Stack in a more visual, flexible way.
+  Use the Llama Stack playground to interact with a Llama Stack server.
 
 * xref:beginner-01-python-programming.adoc[Llama-stack Python programming] +
-  Go deeper into Python development with the Llama Stack SDK. This module covers structured responses, custom tool integrations, and real-world applications.
+  Go deeper into Python development with the Llama Stack SDK. This module covers an introduction to the Llama Stack python SDK.
 
 == Next Step
 

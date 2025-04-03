@@ -1,3 +1,86 @@
-= Beginner - python programming
+= Beginner Python Programming
+:page-layout: lab
+:experimental:
 
-TBD
+== Goal
+
+In this module, you will learn how to interact with the Llama Stack server using Python. You'll set up your environment, install the necessary SDK, and run a Python script to communicate with the Llama Stack server.
+
+== Prerequisites
+
+* Llama Stack server running (see: xref:beginner-01-helloworld.adoc[Llama-stack Helloworld])
+* Python 3.10+ installed on your local machine
+
+== Step 1: Set Up the Python Environment
+
+First, create and activate a virtual environment (optional but recommended):
+
+[source,sh,role=execute]
+----
+python -m venv llama_env
+source llama_env/bin/activate
+----
+
+== Step 2: Install the Llama Stack Client SDK
+
+Install the Llama Stack client SDK using pip:
+
+[source,sh,role=execute]
+----
+pip install llama-stack-client
+----
+
+== Step 3: Create a Python Script to Interact with Llama Stack
+
+Create a Python script named `llama_interaction.py`:
+
+[source,python,role=execute]
+----
+cat << 'EOF' > llama_interaction.py
+from llama_stack_client import LlamaStackClient
+
+# Initialize the client
+client = LlamaStackClient(base_url="http://localhost:8321")
+
+# Define the model ID
+model_id = "meta-llama/Llama-3.2-3B-Instruct"
+
+# Create a chat completion request
+response = client.inference.chat_completion(
+    messages=[{"role": "user", "content": "Hello, what model are you?"}],
+    model_id=model_id
+)
+
+# Print the response
+print("Model Response:")
+print(response.completion_message.content)
+EOF
+----
+This script initializes the Llama Stack client, sends a message to the specified model, and prints the model's response.&#8203;:contentReference[oaicite:2]{index=2}
+
+== Step 4: Run the Python Script
+
+Execute the script:
+
+[source,sh,role=execute]
+----
+python llama_interaction.py
+----
+
+You should receive a response from the model similar to:
+
+[source,txt]
+----
+Model Response:
+Hello! I'm a Meta LLaMA 3.2 3B Instruct model. How can I assist you today?
+----
+
+== Summary
+
+In this module, you:
+
+* Set up a Python environment and installed the Llama Stack client SDK
+* Created and executed a Python script to interact with the Llama Stack server
+* Sent a message to the model and processed its response
+
+This foundational knowledge enables you to build more complex applications leveraging the Llama Stack's capabilities.
