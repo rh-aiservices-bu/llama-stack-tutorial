@@ -78,7 +78,7 @@ Create and activate a Python virtual environment:
 
 [source,sh,role=execute]
 ----
-python -m venv llama_env
+python3 -m venv llama_env
 source llama_env/bin/activate
 ----
 

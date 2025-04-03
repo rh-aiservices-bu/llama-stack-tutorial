@@ -17,7 +17,7 @@ First, create and activate a virtual environment (optional but recommended):
 
 [source,sh,role=execute]
 ----
-python -m venv llama_env
+python3 -m venv llama_env
 source llama_env/bin/activate
 ----
 
@@ -36,7 +36,7 @@ Create a Python script named `llama_chat.py`:
 
 [source,python,role=execute]
 ----
-cat << 'EOF' > llama_interaction.py
+cat << 'EOF' > llama_chat.py
 from llama_stack_client import LlamaStackClient
 
 # Initialize the client

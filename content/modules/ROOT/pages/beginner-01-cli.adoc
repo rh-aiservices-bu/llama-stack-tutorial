@@ -17,7 +17,7 @@ First, set up a virtual environment (optional but recommended):
 
 [source,sh,role=execute]
 ----
-python -m venv llama_env
+python3 -m venv llama_env
 source llama_env/bin/activate
 ----
 
