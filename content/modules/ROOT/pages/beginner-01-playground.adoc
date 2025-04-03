@@ -4,7 +4,7 @@
 
 == Goal
 
-This module introduces the **Llama-Stack Dashboard**, a user-friendly interface designed to demonstrate the core capabilities of Llama Stack in an interactive environment.
+This module introduces the **Llama-Stack Playground**, a user-friendly interface designed to demonstrate the core capabilities of Llama Stack in an interactive environment.
 The dashboard allows you to inspect API providers and resources exposed by Llama Stack.
 
 == Prerequisites
@@ -53,7 +53,7 @@ image::llama-stack-dashboard2.png[API Providers, width=800]
 
 In this module, you:
 
-* Deployed and launched the Llama-Stack Dashboard
+* Deployed and launched the Llama-Stack Playground
 * Interacted with the LLM model through the chat interface
 * Explored available models, providers, and other resources
 
