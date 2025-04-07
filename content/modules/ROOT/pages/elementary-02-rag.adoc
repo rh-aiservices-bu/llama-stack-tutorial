@@ -175,6 +175,8 @@ Make sure the file is saved, and then from your terminal run:
 python basic_rag.py
 ----
 
+You should now see the responses from Llama Stack including the RAG responses (in green).  Once the information has been retrieved RAG database the LLM will then use this information to answer the original question from the prompt.
+
 == Summary
 
 In this module, you:
