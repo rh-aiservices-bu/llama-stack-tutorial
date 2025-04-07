@@ -7,6 +7,7 @@
 
 
 * xref:elementary-02.adoc[2. Elementary]
+** xref:elementary-02-rag.adoc[Retrieval Augmented Generation (RAG)]
 * xref:intermediate-03.adoc[3. Intermediate]
 * xref:advanced-04.adoc[4. Advanced]
 

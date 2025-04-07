@@ -1,0 +1,189 @@
+= Setting Up Retrieval-Augmented Generation (RAG) with Llama Stack
+:page-layout: lab
+:experimental:
+
+== Goal
+
+In this module, you will learn how to set up Retrieval-Augmented Generation (RAG) using Llama Stack. RAG enhances language models by incorporating external knowledge, allowing for more informed and contextually relevant responses. You'll set up a vector database, ingest documents, and perform retrieval operations.
+
+In this example we'll use a simple in memory vector database.  One of the key advantages of Llama Stack is the ability to swap this in memory database with an enterprise grade persistent database with minimal effort.
+
+== Prerequisites
+
+* Llama Stack server running (see: xref:beginner-01-helloworld.adoc[Llama-stack Helloworld])
+* Python 3.10+ installed on your local machine
+
+== Step 1: Create and Activate a Python Virtual Environment
+
+Before installing packages, create and activate a Python virtual environment:
+
+[source,sh,role=execute]
+----
+python3 -m venv rag_env
+source rag_env/bin/activate
+----
+
+This keeps your project dependencies isolated from the global Python environment.
+
+== Step 2: Install Required Packages
+
+Install the Llama Stack client and FAISS (faiss-cpu is a Python package that provides a CPU-based implementation of Facebook AI Similarity Search (FAISS) — an efficient library for vector similarity search and clustering of dense vectors.)
+
+[source,sh,role=execute]
+----
+pip install llama-stack-client==0.2.1 faiss-cpu
+----
+
+== Step 3: Initialize the Llama Stack Client
+
+Create a Python script named `basic_rag.py` and add the following code to import libraries and initialize the client:
+
+[source,python,role=execute]
+----
+from llama_stack_client import LlamaStackClient
+from llama_stack_client.types.shared_params.document import Document as RAGDocument
+from llama_stack_client.lib.agents.agent import Agent
+from llama_stack_client.lib.agents.event_logger import EventLogger as AgentEventLogger
+import os
+
+# Initialize the client
+client = LlamaStackClient(base_url="http://localhost:8321")
+----
+
+Replace the base URL if your Llama Stack server is running on a different host or port.
+
+== Step 4: Register a Vector Database
+
+Register a vector database to store document embeddings:
+
+[source,python,role=execute]
+----
+vector_db_id = "my_documents"
+
+response = client.vector_dbs.register(
+    vector_db_id=vector_db_id,
+    embedding_model="all-MiniLM-L6-v2",
+    embedding_dimension=384,
+    provider_id="faiss",
+)
+----
+
+`all-MiniLM-L6-v2` is a small, efficient model that transforms text into vectors for tasks like semantic search and retrieval — making it a great default embedding model for RAG workflows in Llama Stack.
+
+== Step 5: Ingest Documents into the Vector Database
+
+Add one or more documents to the database for future retrieval:
+
+[source,python,role=execute]
+----
+urls = ["memory_optimizations.rst", "chat.rst", "llama3.rst"]
+documents = [
+    RAGDocument(
+        document_id=f"num-{i}",
+        content=f"https://raw.githubusercontent.com/pytorch/torchtune/main/docs/source/tutorials/{url}",
+        mime_type="text/plain",
+        metadata={},
+    )
+    for i, url in enumerate(urls)
+]
+
+client.tool_runtime.rag_tool.insert(
+    documents=documents,
+    vector_db_id=vector_db_id,
+    chunk_size_in_tokens=512,
+)
+
+----
+
+== Step 6: Define the RAG Agent
+
+Add the following code to define a new RAG agent:
+
+[source,python,role=execute]
+----
+import os
+from llama_stack_client.lib.agents.agent import Agent
+
+rag_agent = Agent(
+    client,
+    model=os.environ["INFERENCE_MODEL"],
+    # Define instructions for the agent (system prompt)
+    instructions="You are a helpful assistant",
+    enable_session_persistence=False,
+    # Define tools available to the agent
+    tools=[
+        {
+            "name": "builtin::rag/knowledge_search",
+            "args": {
+                "vector_db_ids": [vector_db_id],
+            },
+        }
+    ],
+)
+----
+
+This sets up a Llama Stack agent with access to a knowledge search tool that performs vector-based retrieval from your previously ingested documents.
+
+== Step 7: Create a New Session
+
+Create a session to start a conversation with the agent:
+
+[source,python,role=execute]
+----
+session_id = rag_agent.create_session("test-session")
+----
+
+Sessions help the agent maintain conversation history and context across multiple turns.
+
+== Step 8: Send User Prompts to the Agent
+
+Define one or more prompts and pass them to the agent:
+
+[source,python,role=execute]
+----
+user_prompts = [
+    "How to optimize memory usage in torchtune? use the knowledge_search tool to get information.",
+]
+----
+
+== Step 9: Run the Agent Turn Loop
+
+Send prompts to the agent and process its responses using the `create_turn` method:
+
+[source,python,role=execute]
+----
+from llama_stack_client.lib.agents.event_logger import EventLogger as AgentEventLogger
+
+for prompt in user_prompts:
+    print(f"User> {prompt}")
+    response = rag_agent.create_turn(
+        messages=[{"role": "user", "content": prompt}],
+        session_id=session_id,
+    )
+    for log in AgentEventLogger().log(response):
+        log.print()
+----
+
+This loop prints both the user prompt and the agent's response for each turn, along with any tool output generated by the knowledge search.
+
+== Step 10: Run the python application
+
+Make sure the file is saved, and then from your terminal run:
+
+[source,sh,role=execute]
+----
+python basic_rag.py
+----
+
+== Summary
+
+In this module, you:
+
+* Created a Python virtual environment for your project
+* Installed required packages for RAG setup
+* Initialized the Llama Stack client
+* Registered a vector database using the FAISS provider
+* Ingested documents into the database
+* Queried the vector database to retrieve relevant information
+
+You're now ready to build RAG-enabled applications using Llama Stack!

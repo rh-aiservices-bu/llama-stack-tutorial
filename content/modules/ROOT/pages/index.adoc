@@ -4,6 +4,10 @@ Welcome to the Llama-stack tutorial.
 
 The aim of this tutorial is to provide a resource for developers interested in learning and using Llama-stack.
 
+Before we get started, what is Llama Stack?
+
+Llama Stack is an open-source framework that makes it easier to build, run, and experiment with large language models on your own infrastructure. It provides a unified interface for interacting with different model providers (like Ollama or vllm), supports tools and agents for more complex workflows, and includes a CLI, Python SDK, and web-based Playground for hands-on development.
+
 The tutorial is divided into four sections:
 
 * xref:beginner-01.adoc[1. Beginner]

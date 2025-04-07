@@ -64,7 +64,7 @@ Now run the Llama Stack container using Podman:
 podman run -it \
   -p $LLAMA_STACK_PORT:$LLAMA_STACK_PORT \
   -v ~/.llama:/root/.llama \
-  llamastack/distribution-ollama \
+  llamastack/distribution-ollama:0.2.0 \
   --port $LLAMA_STACK_PORT \
   --env INFERENCE_MODEL=$LLAMA_STACK_MODEL \
   --env OLLAMA_URL=http://host.docker.internal:11434
