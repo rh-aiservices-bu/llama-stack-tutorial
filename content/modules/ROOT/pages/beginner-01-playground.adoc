@@ -22,7 +22,7 @@ You can deploy the playground using the https://llama-stack.readthedocs.io/en/la
 ----
 podman run -p 8501:8501 \
   -e LLAMA_STACK_ENDPOINT=http://host.containers.internal:8321 \
-  quay.io/rh-aiservices-bu/llama-stack-playground:0.1.9
+  quay.io/rh-aiservices-bu/llama-stack-playground:0.2.1
 ----
 
 Once the container is running, the Llama-Stack playground will be available at `http://localhost:8501`.
