@@ -38,3 +38,4 @@ package-lock.json
 yarn.lock
 
 llama_env
+__pycache__

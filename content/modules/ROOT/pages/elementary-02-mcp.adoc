@@ -1,0 +1,149 @@
+= Integrating a Simple MCP Weather Server with Llama Stack
+:page-layout: lab
+:experimental:
+
+== Goal
+
+In this module, you'll create a simple weather lookup server using the MCP (Model Context Protocol) Python SDK and integrate it with Llama Stack. This demonstrates how to expose your own tool-like services through MCP and use them as "models" inside Llama Stack.
+
+== Prerequisites
+
+* Llama Stack server running (see: xref:beginner-01-helloworld.adoc[Llama-stack Helloworld])
+* Python 3.10+ installed on your local machine
+* MCP Python SDK installed (`pip install mcp[cli]`)
+
+== Step 1: Create a Simple MCP Weather Server
+
+Create a file named `simple_calc.py`:
+
+[source,python,role=execute]
+----
+from mcp.server.fastmcp import FastMCP
+import datetime
+
+# Instantiate the MCP server and defines some basic tools
+mcp = FastMCP("My Python MCP SSE Server")
+
+# @mcp.tool()
+# def upcase(text: str) -> str:
+#     """Convert text to uppercase"""
+#     print(f"upcase: {text}")
+#     return text.upper()
+
+@mcp.tool()
+def add(a: int, b: int) -> int:
+    """Add two numbers."""
+    print(f"add: {a} and {b}")
+    return a + b
+
+@mcp.tool()
+def subtract(a: int, b: int) -> int:
+    """Subtract two numbers."""
+    print(f"subtract: {a} and {b}")
+    return a - b
+
+
+if __name__ == "__main__":
+    # Initialize and run the server
+    mcp.run()
+----
+
+This defines a simple `get_weather` function that returns predefined weather info for a few cities.
+
+== Step 2: Run the MCP Server
+
+Start the MCP server using the CLI:
+
+[source,sh,role=execute]
+----
+npx supergateway --stdio "python simple_calc.py" --port 8020
+----
+
+This will start the server at `http://localhost:8020`.
+
+== Step 3: Register the MCP Server in Llama Stack
+
+In a new terminal, register the MCP server as a provider:
+
+[source,sh,role=execute]
+----
+curl -X POST -H "Content-Type: application/json" \
+--data \
+'{ "provider_id" : "model-context-protocol", "toolgroup_id" : "mcp::simple_calc", "mcp_endpoint" : { "uri" : "http://host.containers.internal:8020/sse"}}' \
+ http://localhost:8321/v1/toolgroups 
+----
+
+
+== Step 4: Query the simple_calc via Llama Stack
+
+Create a file named `test_mcp.py`:
+
+[source,python,role=execute]
+
+[source,sh,role=execute]
+----
+
+
+from llama_stack_client.lib.agents.event_logger import EventLogger
+base_url = "http://localhost:8321"
+
+from llama_stack_client import LlamaStackClient
+
+client = LlamaStackClient(
+    base_url=base_url
+)
+model = "meta-llama/Llama-3.2-3B-Instruct"
+# Here is a system prompt we have come up with which works well for this query
+
+sys_prompt1= """You are a helpful assistant. Use tools to answer. When you use a tool always respond with a summary of the result."""
+
+from llama_stack_client import Agent
+# Create simple agent with tools
+agent = Agent(
+    client,
+    model=model, # replace this with your choice of model
+    instructions = sys_prompt1 , # update system prompt based on the model you are using
+    tools=["mcp::simple_calc"],
+    tool_config={"tool_choice":"auto"},
+)
+
+user_prompts = ["What is the sum of 1 + 2?"]
+session_id = agent.create_session(session_name="crm_demo")
+
+for prompt in user_prompts:
+    turn_response = agent.create_turn(
+        messages=[
+            {
+                "role":"user",
+                "content": prompt
+            }
+        ],
+        session_id=session_id,
+        stream=True,
+    )
+    for log in EventLogger().log(turn_response):
+        log.print()
+----
+
+Run the test file
+
+`python test_mcp`
+
+Expected output:
+
+[source,txt]
+----
+inference> [add(a=1, b=2)]
+tool_execution> Tool:add Args:{'a': 1.0, 'b': 2.0}
+tool_execution> Tool:add Response:{"type":"text","text":"3","annotations":null}
+inference> The result of the operation is 3.
+----
+
+== Summary
+
+In this module, you:
+
+* Built a lightweight weather lookup service using the MCP Python SDK
+* Ran the service as a local MCP server
+* Registered it as a model provider in Llama Stack
+* Tested the llama stack connection to the mcp server with a sample python file.
