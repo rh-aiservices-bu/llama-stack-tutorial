@@ -14,27 +14,41 @@ In this module, you will launch the Llama Stack server using a model served by O
 
 == Step 1: Start the Ollama Server
 
-Open a terminal and run the Ollama background service:
+First, check if Ollama is already running:
 
 [source,sh,role=execute]
 ----
-ollama serve
+ollama ps
 ----
 
-Leave this terminal open and running.
+If Ollama is running, you’ll see output like this:
+
+[source,txt]
+----
+NAME                     ID       SIZE      PROCESSOR    UNTIL
+----
 
 == Step 2: Load the Model
 
 Llama Stack does not dynamically load models from Ollama. You need to preload and keep the model in memory.
 
-Open a second terminal and run:
+Run the following command:
 
 [source,sh,role=execute]
 ----
 ollama run llama3.2:3b-instruct-fp16 --keepalive 60m
 ----
 
-To confirm the model is running and in memory:
+After a few seconds you should be presented with a prompt where you can chat with the model.
+
+Enter the folling to quit the chat:
+
+[source,sh,role=execute]
+----
+/bye
+----
+
+To confirm the model is running and in memory run:
 
 [source,sh,role=execute]
 ----
@@ -44,8 +58,6 @@ ollama ps
 You should see `llama3.2:3b-instruct-fp16` listed.
 
 == Step 3: Start the Llama Stack Server
-
-Open a third terminal.
 
 First, export the necessary environment variables:
 
@@ -74,7 +86,7 @@ The Llama Stack server will start and listen on port `8321`.
 
 == Step 4: Hello World with the CLI
 
-Create and activate a Python virtual environment:
+In a second terminal, create and activate a Python virtual environment:
 
 [source,sh,role=execute]
 ----
@@ -86,7 +98,7 @@ Install the Llama Stack client CLI:
 
 [source,sh,role=execute]
 ----
-pip install llama-stack-client
+pip install llama-stack-client==0.2.1
 ----
 
 Configure the CLI to point to your running server:

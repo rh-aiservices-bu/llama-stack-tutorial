@@ -27,7 +27,7 @@ Install the Llama Stack client SDK using pip:
 
 [source,sh,role=execute]
 ----
-pip install llama-stack-client
+pip install llama-stack-client==0.2.1
 ----
 
 == Step 3: Create a Python Script to ChatCompletionResponse with Llama Stack

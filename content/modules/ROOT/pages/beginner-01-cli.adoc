@@ -25,7 +25,7 @@ Install the CLI via pip:
 
 [source,sh,role=execute]
 ----
-pip install llama-stack-client
+pip install llama-stack-client==0.2.1
 ----
 
 == Step 2: Configure the CLI
