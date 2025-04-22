@@ -4,15 +4,24 @@
 
 == Goal
 
-In this module, you'll create a simple weather lookup server using the MCP (Model Context Protocol) Python SDK and integrate it with Llama Stack. This demonstrates how to expose your own tool-like services through MCP and use them as "models" inside Llama Stack.
+In this module, you'll create a simple calculator server using the MCP (Model Context Protocol) Python SDK and integrate it with Llama Stack.
 
 == Prerequisites
 
 * Llama Stack server running (see: xref:beginner-01-helloworld.adoc[Llama-stack Helloworld])
 * Python 3.10+ installed on your local machine
-* MCP Python SDK installed (`pip install mcp[cli]`)
+* npx instaled on your machine (tested with version 10.8+)
 
-== Step 1: Create a Simple MCP Weather Server
+== Step 1: Create a Simple MCP Calculator Server
+
+Install the mcp SDK
+
+[source,sh,role=execute]
+----
+
+pip install mcp==1.6.0
+
+----
 
 Create a file named `simple_calc.py`:
 
@@ -41,7 +50,6 @@ def subtract(a: int, b: int) -> int:
     """Subtract two numbers."""
     print(f"subtract: {a} and {b}")
     return a - b
-
 
 if __name__ == "__main__":
     # Initialize and run the server
@@ -108,7 +116,7 @@ agent = Agent(
 )
 
 user_prompts = ["What is the sum of 1 + 2?"]
-session_id = agent.create_session(session_name="crm_demo")
+session_id = agent.create_session(session_name="calc_demo")
 
 for prompt in user_prompts:
     turn_response = agent.create_turn(
@@ -143,7 +151,7 @@ inference> The result of the operation is 3.
 
 In this module, you:
 
-* Built a lightweight weather lookup service using the MCP Python SDK
+* Built a lightweight calculator service using the MCP Python SDK
 * Ran the service as a local MCP server
-* Registered it as a model provider in Llama Stack
+* Registered it as a toolgroup in Llama Stack
 * Tested the llama stack connection to the mcp server with a sample python file.
