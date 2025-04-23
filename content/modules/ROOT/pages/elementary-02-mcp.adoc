@@ -4,26 +4,24 @@
 
 == Goal
 
-In this module, you'll create a simple calculator server using the MCP (Model Context Protocol) Python SDK and integrate it with Llama Stack.
+In this module, you'll create a simple calculator server using the MCP (Model Context Protocol) Python SDK and integrate it with Llama Stack. This exercise demonstrates how to expose custom logic as tool-like services that can be invoked by agents inside the Llama Stack ecosystem. By the end of this module, you'll understand how to turn any Python function into a callable "model" via MCP and how to wire it into a fully agentic workflow.
 
 == Prerequisites
 
 * Llama Stack server running (see: xref:beginner-01-helloworld.adoc[Llama-stack Helloworld])
 * Python 3.10+ installed on your local machine
-* npx instaled on your machine (tested with version 10.8+)
+* `npx` installed on your machine (tested with version 10.8+)
 
 == Step 1: Create a Simple MCP Calculator Server
 
-Install the mcp SDK
+First, install the `mcp` SDK, which enables you to quickly build tool-exposing servers:
 
 [source,sh,role=execute]
 ----
-
 pip install mcp==1.6.0
-
 ----
 
-Create a file named `simple_calc.py`:
+Create a file named `simple_calc.py`. This file defines a lightweight server that exposes a set of tools (in this case, arithmetic operations) over the MCP protocol:
 
 [source,python,role=execute]
 ----
@@ -32,12 +30,6 @@ import datetime
 
 # Instantiate the MCP server and defines some basic tools
 mcp = FastMCP("My Python MCP SSE Server")
-
-# @mcp.tool()
-# def upcase(text: str) -> str:
-#     """Convert text to uppercase"""
-#     print(f"upcase: {text}")
-#     return text.upper()
 
 @mcp.tool()
 def add(a: int, b: int) -> int:
@@ -56,22 +48,22 @@ if __name__ == "__main__":
     mcp.run()
 ----
 
-This defines a simple `get_weather` function that returns predefined weather info for a few cities.
+This script uses the `@mcp.tool()` decorator to expose Python functions as MCP-compatible tools. These tools accept JSON-like input and return structured output, making them ideal for integration into LLM agent workflows.
 
 == Step 2: Run the MCP Server
 
-Start the MCP server using the CLI:
+You can now launch your server using the `supergateway` utility.  The `supergateway` bridges STDIO communication with HTTP-based MCP clients like Llama Stack.
 
 [source,sh,role=execute]
 ----
 npx supergateway --stdio "python simple_calc.py" --port 8020
 ----
 
-This will start the server at `http://localhost:8020`.
+This runs your calculator server and makes it available at `http://localhost:8020`.
 
 == Step 3: Register the MCP Server in Llama Stack
 
-In a new terminal, register the MCP server as a provider:
+To allow Llama Stack to call this tool, you must register it as a toolgroup:
 
 [source,sh,role=execute]
 ----
@@ -81,17 +73,16 @@ curl -X POST -H "Content-Type: application/json" \
  http://localhost:8321/v1/toolgroups 
 ----
 
+This step tells Llama Stack that your local calculator server is available and that it supports tools grouped under the ID `mcp::simple_calc`.
 
 == Step 4: Query the simple_calc via Llama Stack
+
+Now, let's test the integration by writing a Python script that uses the Llama Stack client SDK to send a prompt to the registered toolgroup.
 
 Create a file named `test_mcp.py`:
 
 [source,python,role=execute]
-
-[source,sh,role=execute]
 ----
-
-
 from llama_stack_client.lib.agents.event_logger import EventLogger
 base_url = "http://localhost:8321"
 
@@ -101,18 +92,19 @@ client = LlamaStackClient(
     base_url=base_url
 )
 model = "meta-llama/Llama-3.2-3B-Instruct"
-# Here is a system prompt we have come up with which works well for this query
 
-sys_prompt1= """You are a helpful assistant. Use tools to answer. When you use a tool always respond with a summary of the result."""
+# System prompt configures the assistant behavior
+sys_prompt1 = """You are a helpful assistant. Use tools to answer. When you use a tool always respond with a summary of the result."""
 
 from llama_stack_client import Agent
-# Create simple agent with tools
+
+# Create an agent that will use the simple_calc tools to respond to user queries
 agent = Agent(
     client,
-    model=model, # replace this with your choice of model
-    instructions = sys_prompt1 , # update system prompt based on the model you are using
-    tools=["mcp::simple_calc"],
-    tool_config={"tool_choice":"auto"},
+    model=model,
+    instructions=sys_prompt1,
+    tools=["mcp::simple_calc"],  # Use the toolgroup we registered earlier
+    tool_config={"tool_choice": "auto"},  # Automatically choose tools based on prompt
 )
 
 user_prompts = ["What is the sum of 1 + 2?"]
@@ -122,7 +114,7 @@ for prompt in user_prompts:
     turn_response = agent.create_turn(
         messages=[
             {
-                "role":"user",
+                "role": "user",
                 "content": prompt
             }
         ],
@@ -133,9 +125,16 @@ for prompt in user_prompts:
         log.print()
 ----
 
-Run the test file
+This script sets up a simple LLM agent with access to our calculator toolgroup. It sends a prompt to the model, which detects the need to use a tool, Llama Stack calls the tool and returns the answer to the model, the model returns a human-readable answer.
 
-`python test_mcp`
+== Step 5: Run the Test
+
+Run the Python test script:
+
+[source,sh,role=execute]
+----
+python test_mcp.py
+----
 
 Expected output:
 
@@ -147,11 +146,15 @@ tool_execution> Tool:add Response:{"type":"text","text":"3","annotations":null}
 inference> The result of the operation is 3.
 ----
 
+This confirms that the agent successfully routed the request to your MCP server and returned the result from the `add()` tool.
+
 == Summary
 
 In this module, you:
 
 * Built a lightweight calculator service using the MCP Python SDK
-* Ran the service as a local MCP server
-* Registered it as a toolgroup in Llama Stack
-* Tested the llama stack connection to the mcp server with a sample python file.
+* Ran the service as a local MCP server using `supergateway`
+* Registered it as a `toolgroup` in Llama Stack
+* Tested the connection by querying the server through an LLM agent in a Python script
+
+This pattern can be extended to wrap any business logic or microservice in a tool interface, enabling LLMs to use your logic like plug-and-play models. It’s a powerful way to make custom tools available to AI agents.
