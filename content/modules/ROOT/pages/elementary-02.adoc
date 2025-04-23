@@ -1,3 +1,21 @@
-= Elementary
+= Elementary Introduction
+:page-layout: lab
+:experimental:
 
-TBD
+== Goal
+
+In this section, you'll gain practical experience with two key features of the Llama Stack platform: Retrieval-Augmented Generation (RAG) and tool integration using the MCP Python SDK. These modules teach you how to combine external knowledge and custom logic to build intelligent, agent-driven workflows.
+
+== Overview
+
+This section is divided into two focused modules:
+
+* xref:elementary-02-rag.adoc[Retrieval-Augmented Generation with Llama Stack] +
+  Learn how to set up a basic RAG pipeline using an in-memory vector database. You'll ingest documents, perform semantic retrieval, and enable your Llama Stack agents to reference external content for more informed responses. Swap out the simple database for a production-ready solution with minimal code changes.
+
+* xref:elementary-02-mcp-tools.adoc[Tool Integration with MCP Python SDK] +
+  Build a simple calculator server and expose it as a tool using the MCP protocol. This module demonstrates how to wrap Python functions into callable services and integrate them into your Llama Stack workflows to extend agent capabilities.
+
+== Next Step
+
+Start with xref:elementary-02-rag.adoc[Retrieval-Augmented Generation with Llama Stack] to enhance your agents with dynamic access to external knowledge!
