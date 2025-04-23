@@ -4,7 +4,7 @@
 
 == Goal
 
-In this module, you'll create a simple calculator server using the MCP (Model Context Protocol) Python SDK and integrate it with Llama Stack. This exercise demonstrates how to expose custom logic as tool-like services that can be invoked by agents inside the Llama Stack ecosystem. By the end of this module, you'll understand how to turn any Python function into a callable "model" via MCP and how to wire it into a fully agentic workflow.
+In this module, you'll create a simple calculator server using the MCP (Model Context Protocol) Python SDK and integrate it with Llama Stack. This exercise demonstrates how to expose custom logic as tool-like services that can be invoked by agents inside the Llama Stack ecosystem. By the end of this module, you'll understand how to turn any Python function into a callable "tool" via MCP and how to wire it into a fully agentic workflow.
 
 == Prerequisites
 
