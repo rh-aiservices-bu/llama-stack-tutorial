@@ -12,56 +12,18 @@ In this module, you'll create a simple calculator server using the MCP (Model Co
 * Python 3.10+ installed on your local machine
 * `npx` installed on your machine (tested with version 10.8+)
 
-== Step 1: Create a Simple MCP Calculator Server
+== Step 1: Run a simple calculator MCP server
 
-First, install the `mcp` SDK, which enables you to quickly build tool-exposing servers:
-
-[source,sh,role=execute]
-----
-pip install mcp==1.6.0
-----
-
-Create a file named `simple_calc.py`. This file defines a lightweight server that exposes a set of tools (in this case, arithmetic operations) over the MCP protocol:
-
-[source,python,role=execute]
-----
-from mcp.server.fastmcp import FastMCP
-import datetime
-
-# Instantiate the MCP server and defines some basic tools
-mcp = FastMCP("My Python MCP SSE Server")
-
-@mcp.tool()
-def add(a: int, b: int) -> int:
-    """Add two numbers."""
-    print(f"add: {a} and {b}")
-    return a + b
-
-@mcp.tool()
-def subtract(a: int, b: int) -> int:
-    """Subtract two numbers."""
-    print(f"subtract: {a} and {b}")
-    return a - b
-
-if __name__ == "__main__":
-    # Initialize and run the server
-    mcp.run()
-----
-
-This script uses the `@mcp.tool()` decorator to expose Python functions as MCP-compatible tools. These tools accept JSON-like input and return structured output, making them ideal for integration into LLM agent workflows.
-
-== Step 2: Run the MCP Server
-
-You can now launch your server using the `supergateway` utility.  The `supergateway` bridges STDIO communication with HTTP-based MCP clients like Llama Stack.
+We'll use podman to run a simple MPC calculator server.
 
 [source,sh,role=execute]
 ----
-npx supergateway --stdio "python simple_calc.py" --port 8020
+podman run -e SUPERGATEWAY_PORT=8020 -p 8020:8020 quay.io/rh-aiservices-bu/mcp-simple-calc:latest
 ----
 
 This runs your calculator server and makes it available at `http://localhost:8020`.
 
-== Step 3: Register the MCP Server in Llama Stack
+== Step 2: Register the MCP Server in Llama Stack
 
 To allow Llama Stack to call this tool, you must register it as a toolgroup:
 
@@ -69,20 +31,20 @@ To allow Llama Stack to call this tool, you must register it as a toolgroup:
 ----
 curl -X POST -H "Content-Type: application/json" \
 --data \
-'{ "provider_id" : "model-context-protocol", "toolgroup_id" : "mcp::simple_calc", "mcp_endpoint" : { "uri" : "http://host.containers.internal:8020/sse"}}' \
+'{ "provider_id" : "model-context-protocol", "toolgroup_id" : "mcp::simple_calc", "mcp_endpoint" : { "uri" : "http://localhost:8020/sse"}}' \
  http://localhost:8321/v1/toolgroups 
 ----
 
 This step tells Llama Stack that your local calculator server is available and that it supports tools grouped under the ID `mcp::simple_calc`.
 
-== Step 4: Query the simple_calc via Llama Stack
+== Step 3: Query the simple_calc via Llama Stack
 
 Now, let's test the integration by writing a Python script that uses the Llama Stack client SDK to send a prompt to the registered toolgroup.
 
-Create a file named `test_mcp.py`:
-
-[source,python,role=execute]
+Run this command to create a file called test_mcp.py
+[source,sh,role=execute]
 ----
+cat << 'EOF' >  test_mcp.py
 from llama_stack_client.lib.agents.event_logger import EventLogger
 base_url = "http://localhost:8321"
 
@@ -123,11 +85,19 @@ for prompt in user_prompts:
     )
     for log in EventLogger().log(turn_response):
         log.print()
+EOF
 ----
 
 This script sets up a simple LLM agent with access to our calculator toolgroup. It sends a prompt to the model, which detects the need to use a tool, Llama Stack calls the tool and returns the answer to the model, the model returns a human-readable answer.
 
 == Step 5: Run the Test
+
+Install the Llama Stack Client sdk
+
+[source,sh,role=execute]
+----
+pip install llama-stack-client==0.2.2
+----
 
 Run the Python test script:
 
@@ -152,8 +122,7 @@ This confirms that the agent successfully routed the request to your MCP server 
 
 In this module, you:
 
-* Built a lightweight calculator service using the MCP Python SDK
-* Ran the service as a local MCP server using `supergateway`
+* Deployed a simple calculator MCP server using podman
 * Registered it as a `toolgroup` in Llama Stack
 * Tested the connection by querying the server through an LLM agent in a Python script
 

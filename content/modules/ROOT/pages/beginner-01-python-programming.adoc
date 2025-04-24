@@ -10,18 +10,9 @@ In this module, you will learn how to interact with the Llama Stack server using
 
 * Llama Stack server running (see: xref:beginner-01-helloworld.adoc[Llama-stack Helloworld])
 * Python 3.10+ installed on your local machine
+* Python virtual environment setup and activated (see: xref:beginner-01-helloworld.adoc[Llama-stack Helloworld])
 
-== Step 1: Set Up the Python Environment
-
-First, create and activate a virtual environment (optional but recommended):
-
-[source,sh,role=execute]
-----
-python3 -m venv llama_env
-source llama_env/bin/activate
-----
-
-== Step 2: Install the Llama Stack Client SDK
+== Step 1: Install the Llama Stack Client SDK
 
 Install the Llama Stack client SDK using pip:
 
@@ -30,7 +21,7 @@ Install the Llama Stack client SDK using pip:
 pip install llama-stack-client==0.2.1
 ----
 
-== Step 3: Create a Python Script to ChatCompletionResponse with Llama Stack
+== Step 2: Create a Python Script to ChatCompletionResponse with Llama Stack
 
 Create a Python script named `llama_chat.py`:
 
@@ -58,7 +49,7 @@ EOF
 ----
 This script initializes the Llama Stack client, and allows you to chat with the model.  Enter "exit" or "quit" to stop the application.
 
-== Step 4: Run the Python Script
+== Step 3: Run the Python Script
 
 Execute the script:
 
