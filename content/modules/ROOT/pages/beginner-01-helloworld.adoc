@@ -73,20 +73,53 @@ Now run the Llama Stack container using Podman:
 
 [source,sh,role=execute]
 ----
-podman run -it \
+podman run -it --network host \
   -p $LLAMA_STACK_PORT:$LLAMA_STACK_PORT \
-  -v ~/.llama:/root/.llama \
   llamastack/distribution-ollama:0.2.0 \
   --port $LLAMA_STACK_PORT \
   --env INFERENCE_MODEL=$LLAMA_STACK_MODEL \
-  --env OLLAMA_URL=http://host.docker.internal:11434
+  --env OLLAMA_URL=http://localhost:11434
 ----
+
+You may be prompted to select the image, if so, selec the image from docker.io
 
 The Llama Stack server will start and listen on port `8321`.
 
 == Step 4: Hello World with the CLI
 
-In a second terminal, create and activate a Python virtual environment:
+In a second terminal, create and activate a Python virtual environment
+
+Before creating the virtual environment, ensure you're using **Python 3.11 or later**. You can check your current Python version with:
+
+[source,sh,role=execute]
+----
+python3 --version
+----
+
+If this version of python is < 3.10, we will need to use a different version.  You can find the availble versions by running
+
+[source,sh,role=execute]
+----
+ls /usr/bin/python*
+----
+
+For example if you see python3.12 listed run
+
+[source,sh,role=execute]
+----
+sudo update-alternatives --install /usr/bin/python3 python /usr/bin/python3.12 2
+----
+
+Then run the following to make this version the active version.
+
+[source,sh,role=execute]
+----
+sudo update-alternatives --config python
+----
+
+And choose the option for python 3.12 e.g. option 2.
+
+You can now create the python virtual environment.
 
 [source,sh,role=execute]
 ----

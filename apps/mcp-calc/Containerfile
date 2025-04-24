@@ -1,0 +1,32 @@
+# Use UBI9 with Python 3.11
+FROM registry.access.redhat.com/ubi9/python-311
+
+# Metadata
+LABEL maintainer="philip@deewhy.ie"
+WORKDIR /opt/app-root/src
+
+USER root
+
+# Install system dependencies including Node.js and npx
+RUN dnf update -y && \
+    dnf install -y \
+        nodejs \
+        npm \
+        && npm install -g supergateway \
+        && dnf clean all
+
+# Copy Python requirements and install them
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the app
+COPY . .
+
+RUN chown -R 1001:0 /opt/app-root/src
+
+USER 1001
+
+ENV SUPERGATEWAY_PORT=8000
+
+# Run Python MCP server and npx supergateway in parallel
+CMD npx -y supergateway --stdio "python calc.py" --port $SUPERGATEWAY_PORT
