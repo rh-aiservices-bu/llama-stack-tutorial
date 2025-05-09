@@ -17,10 +17,26 @@ In this module, you'll use a simple weather MCP server and integrate it with Lla
 
 We'll use Podman to run a pre-built Weather MCP server container.
 
+[tabs]
+====
+
+[tab]
+.Linux
+--
 [source,sh,role=execute]
 ----
-podman run  -p 3001:3001 quay.io/rh-aiservices-bu/mcp-weather:0.1.0
+podman run -it --network host quay.io/rh-aiservices-bu/mcp-weather:0.1.0
 ----
+--
+
+[tab]
+.macOS
+--
+[source,sh,role=execute]
+----
+podman run -p 3001:3001 quay.io/rh-aiservices-bu/mcp-weather:0.1.0
+----
+--
 
 This launches the Weather MCP server and makes it available at http://localhost:3001/sse.
 
@@ -28,6 +44,12 @@ This launches the Weather MCP server and makes it available at http://localhost:
 
 To allow Llama Stack to interact with the weather server, register it as a toolgroup:
 
+[tabs]
+====
+
+[tab]
+.Linux
+--
 [source,sh,role=execute]
 ----
 curl -X POST -H "Content-Type: application/json"
@@ -35,6 +57,21 @@ curl -X POST -H "Content-Type: application/json"
 '{ "provider_id" : "model-context-protocol", "toolgroup_id" : "mcp::weather", "mcp_endpoint" : { "uri" : "http://localhost:3001/sse"}}'
 http://localhost:8321/v1/toolgroups
 ----
+--
+[tabs]
+====
+
+[tab]
+.Mac
+--
+[source,sh,role=execute]
+----
+curl -X POST -H "Content-Type: application/json"
+--data
+'{ "provider_id" : "model-context-protocol", "toolgroup_id" : "mcp::weather", "mcp_endpoint" : { "uri" : "http://host.containers.internal:3001/sse"}}'
+http://localhost:8321/v1/toolgroups
+----
+--
 
 This step tells Llama Stack that your local weather server is available under the toolgroup ID mcp::weather.
 
