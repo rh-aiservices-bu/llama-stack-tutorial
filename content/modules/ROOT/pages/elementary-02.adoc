@@ -13,8 +13,11 @@ This section is divided into two focused modules:
 * xref:elementary-02-rag.adoc[Retrieval-Augmented Generation with Llama Stack] +
   Learn how to set up a basic RAG pipeline using an in-memory vector database. You'll ingest documents, perform semantic retrieval, and enable your Llama Stack agents to reference external content for more informed responses. Swap out the simple database for a production-ready solution with minimal code changes.
 
-* xref:elementary-02-mcp.adoc[Tool Integration with MCP Python SDK] +
-  Build a simple calculator server and expose it as a tool using the MCP protocol. This module demonstrates how to wrap Python functions into callable services and integrate them into your Llama Stack workflows to extend agent capabilities.
+* xref:elementary-02-mcp.adoc[Tool Integration with MCP Weather server] +
+  Run a simple weather MCP server and expose it as a tool using the MCP protocol. This module demonstrates how to run MCP Servers and integrate them into your Llama Stack workflows to extend agent capabilities.
+
+* xref:elementary-02-react.adoc[ReACT example with MCP] +
+  This module demonstrates how use ReACT reasoning with MCP Servers and integrate them into your Llama Stack.
 
 == Next Step
 

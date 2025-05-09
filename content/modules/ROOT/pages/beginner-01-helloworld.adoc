@@ -71,17 +71,39 @@ export LLAMA_STACK_SERVER=http://localhost:$LLAMA_STACK_PORT
 
 Now run the Llama Stack container using Podman:
 
+[tabs]
+====
+
+[tab]
+.Linux
+--
 [source,sh,role=execute]
 ----
 podman run -it --network host \
-  -p $LLAMA_STACK_PORT:$LLAMA_STACK_PORT \
   llamastack/distribution-ollama:0.2.0 \
   --port $LLAMA_STACK_PORT \
   --env INFERENCE_MODEL=$LLAMA_STACK_MODEL \
   --env OLLAMA_URL=http://localhost:11434
 ----
+--
 
-You may be prompted to select the image, if so, selec the image from docker.io
+[tab]
+.macOS
+--
+[source,sh,role=execute]
+----
+podman run -it \
+  -p $LLAMA_STACK_PORT:$LLAMA_STACK_PORT \
+  llamastack/distribution-ollama:0.2.0 \
+  --port $LLAMA_STACK_PORT \
+  --env INFERENCE_MODEL=$LLAMA_STACK_MODEL \
+  --env OLLAMA_URL=http://host.containers.internal:11434
+----
+--
+
+====
+
+You may be prompted to select the image, if so, select the image from docker.io.
 
 The Llama Stack server will start and listen on port `8321`.
 

@@ -4,47 +4,49 @@
 
 == Goal
 
-In this module, you'll create a simple calculator server using the MCP (Model Context Protocol) Python SDK and integrate it with Llama Stack. This exercise demonstrates how to expose custom logic as tool-like services that can be invoked by agents inside the Llama Stack ecosystem. By the end of this module, you'll understand how to turn any Python function into a callable "tool" via MCP and how to wire it into a fully agentic workflow.
+In this module, you'll use a simple weather MCP server and integrate it with Llama Stack. This exercise demonstrates how to expose custom services that can be invoked by agents inside the Llama Stack environment. By the end of this module, you'll understand how to register an MCP server and make agentic calls to retrieve real-time weather information.
 
 == Prerequisites
 
 * Llama Stack server running (see: xref:beginner-01-helloworld.adoc[Llama-stack Helloworld])
 * Python 3.10+ installed on your local machine
-* `npx` installed on your machine (tested with version 10.8+)
+* Python virtual environment setup and activated (see: xref:beginner-01-helloworld.adoc[Llama-stack Helloworld])
+
 
 == Step 1: Run a simple calculator MCP server
 
-We'll use podman to run a simple MPC calculator server.
+We'll use Podman to run a pre-built Weather MCP server container.
 
 [source,sh,role=execute]
 ----
-podman run -e SUPERGATEWAY_PORT=8020 -p 8020:8020 quay.io/rh-aiservices-bu/mcp-simple-calc:latest
+podman run  -p 3001:3001 quay.io/rh-aiservices-bu/mcp-weather:0.1.0
 ----
 
-This runs your calculator server and makes it available at `http://localhost:8020`.
+This launches the Weather MCP server and makes it available at http://localhost:3001/sse.
 
 == Step 2: Register the MCP Server in Llama Stack
 
-To allow Llama Stack to call this tool, you must register it as a toolgroup:
+To allow Llama Stack to interact with the weather server, register it as a toolgroup:
 
 [source,sh,role=execute]
 ----
-curl -X POST -H "Content-Type: application/json" \
---data \
-'{ "provider_id" : "model-context-protocol", "toolgroup_id" : "mcp::simple_calc", "mcp_endpoint" : { "uri" : "http://localhost:8020/sse"}}' \
- http://localhost:8321/v1/toolgroups 
+curl -X POST -H "Content-Type: application/json"
+--data
+'{ "provider_id" : "model-context-protocol", "toolgroup_id" : "mcp::weather", "mcp_endpoint" : { "uri" : "http://localhost:3001/sse"}}'
+http://localhost:8321/v1/toolgroups
 ----
 
-This step tells Llama Stack that your local calculator server is available and that it supports tools grouped under the ID `mcp::simple_calc`.
+This step tells Llama Stack that your local weather server is available under the toolgroup ID mcp::weather.
 
-== Step 3: Query the simple_calc via Llama Stack
+== Step 3: Query the Weather Tool via Llama Stack
 
-Now, let's test the integration by writing a Python script that uses the Llama Stack client SDK to send a prompt to the registered toolgroup.
+Now, test the integration by creating a Python script that uses the Llama Stack client SDK to ask for the weather.
 
-Run this command to create a file called test_mcp.py
+Run this command to create a file called test_weather.py:
+
 [source,sh,role=execute]
 ----
-cat << 'EOF' >  test_mcp.py
+cat << 'EOF' > test_weather.py
 from llama_stack_client.lib.agents.event_logger import EventLogger
 base_url = "http://localhost:8321"
 
@@ -60,70 +62,70 @@ sys_prompt1 = """You are a helpful assistant. Use tools to answer. When you use 
 
 from llama_stack_client import Agent
 
-# Create an agent that will use the simple_calc tools to respond to user queries
+# Create an agent that will use the weather toolgroup
 agent = Agent(
     client,
     model=model,
     instructions=sys_prompt1,
-    tools=["mcp::simple_calc"],  # Use the toolgroup we registered earlier
-    tool_config={"tool_choice": "auto"},  # Automatically choose tools based on prompt
+    tools=["mcp::weather"], # Use the toolgroup we registered earlier
+    tool_config={"tool_choice": "auto"},
 )
 
-user_prompts = ["What is the sum of 1 + 2?"]
-session_id = agent.create_session(session_name="calc_demo")
+user_prompts = ["What's the weather in Seattle?"]
+session_id = agent.create_session(session_name="weather_demo")
 
 for prompt in user_prompts:
     turn_response = agent.create_turn(
         messages=[
             {
-                "role": "user",
-                "content": prompt
+            "role": "user",
+            "content": prompt
             }
         ],
         session_id=session_id,
         stream=True,
     )
-    for log in EventLogger().log(turn_response):
-        log.print()
-EOF
+for log in EventLogger().log(turn_response):
+    log.print()
 ----
+EOF
 
-This script sets up a simple LLM agent with access to our calculator toolgroup. It sends a prompt to the model, which detects the need to use a tool, Llama Stack calls the tool and returns the answer to the model, the model returns a human-readable answer.
+This script sets up a Llama Stack agent with access to the weather toolgroup and submits the prompt, “What’s the weather in New York?”
 
-== Step 5: Run the Test
+== Step 4: Run the Test
 
-Install the Llama Stack Client sdk
+Install the Llama Stack Client SDK:
 
 [source,sh,role=execute]
 ----
 pip install llama-stack-client==0.2.2
 ----
 
-Run the Python test script:
+Then run the script:
 
 [source,sh,role=execute]
 ----
-python test_mcp.py
+python test_weather.py
 ----
 
-Expected output:
+Expected output (example):
 
 [source,txt]
 ----
-inference> [add(a=1, b=2)]
-tool_execution> Tool:add Args:{'a': 1.0, 'b': 2.0}
-tool_execution> Tool:add Response:{"type":"text","text":"3","annotations":null}
-inference> The result of the operation is 3.
+inference> [getforecast(latitude='47.6067', longitude='-122.3321')]
+tool_execution> Tool:getforecast Args:{'latitude': '47.6067', 'longitude': '-122.3321'}
+tool_execution> Tool:getforecast Response:{"type":"text","text":"Forecast for 47.6067, -122.3321:\n\nOvernight:\nTemperature: 45°F\nWind: 1 mph NNE\nPartly Cloudy\n---\nFriday:\nTemperature: 68°F\nWind: 1 to 6 mph NNW\nPartly Sunny\n---\nFriday Night:\nTemperature: 50°F\nWind: 2 to 6 mph NE\nMostly Cloudy\n---\nSaturday:\nTemperature: 64°F\nWind: 2 to 6 mph S\nMostly Cloudy\n---\nSaturday Night:\nTemperature: 48°F\nWind: 6 mph SSW\nMostly Cloudy then Chance Rain Showers\n---\nSunday:\nTemperature: 63°F\nWind: 6 mph SSW\nChance Rain Showers\n---\nSunday Night:\nTemperature: 48°F\nWind: 2 to 6 mph SSW\nChance Rain Showers\n---\nMonday:\nTemperature: 61°F\nWind: 5 mph WSW\nChance Rain Showers\n---\nMonday Night:\nTemperature: 49°F\nWind: 5 mph SSW\nMostly Cloudy\n---\nTuesday:\nTemperature: 65°F\nWind: 7 mph S\nPartly Sunny\n---\nTuesday Night:\nTemperature: 50°F\nWind: 7 mph SSW\nMostly Cloudy\n---\nWednesday:\nTemperature: 63°F\nWind: 6 mph SSW\nMostly Cloudy\n---\nWednesday Night:\nTemperature: 49°F\nWind: 6 mph SSW\nMostly Cloudy\n---\nThursday:\nTemperature: 63°F\nWind: 5 mph SSW\nPartly Sunny\n---","annotations":null}
+inference> The current weather in Seattle is partly cloudy with a temperature of 45°F overnight, and it's expected to be mostly sunny on Tuesday with a high of 65°F. There's also a chance of rain showers on Sunday and Monday.
 ----
-
-This confirms that the agent successfully routed the request to your MCP server and returned the result from the `add()` tool.
 
 == Summary
 
 In this module, you:
 
-* Deployed a simple calculator MCP server using podman
-* Registered it as a `toolgroup` in Llama Stack
-* Tested the connection by querying the server through an LLM agent in a Python script
+Deployed a Weather MCP server using Podman
 
-This pattern can be extended to wrap any business logic or microservice in a tool interface, enabling LLMs to use your logic like plug-and-play models. It’s a powerful way to make custom tools available to AI agents.
+Registered it in Llama Stack as a toolgroup
+
+Queried the tool using a natural language prompt in a Python agent
+
+This setup enables you to expose real-world data to AI agents with minimal effort, demonstrating tool use using MCP and Llama Stack.

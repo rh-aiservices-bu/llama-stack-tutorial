@@ -1,0 +1,148 @@
+= Using the ReAct agent with Llama Stack
+:navtitle: elementary-03-react
+:description: Using the ReAct agent with Llama Stack
+:keywords: llama-stack, react, agent, mcp, weather, tools
+:page-aliases: elementary-03-react.adoc
+
+== Overview
+
+In this module, you will learn how to run a simple ReAct agent with the Llama Stack to answer real-world queries using a tool-enabled agent.
+
+This tutorial demonstrates:
+- Instantiating a ReAct agent
+- Querying a tool (in this case, `mcp::weather`)
+- Observing streamed, tool-augmented reasoning
+
+The agent uses the `https://www.promptingguide.ai/techniques/react[ReAct,window=_blank]` reasoning paradigm to decide when and how to invoke tools.
+
+== Prerequisites
+
+* Llama Stack server running (see: xref:beginner-01-helloworld.adoc[Llama-stack Helloworld])
+* Python 3.10+ installed on your local machine
+* Python virtual environment setup and activated (see: xref:beginner-01-helloworld.adoc[Llama-stack Helloworld])
+* The MCP weather server running and registered as a toolgroup in Llama Stack (see: xref:elementary-02-mcp.adoc[Integrating a Simple MCP Weather Server with Llama Stack])
+
+To install the necessary client library:
+
+[source, bash]
+----
+pip install llama-stack-client fire termcolor
+----
+
+== Code
+
+Run this command to create a file called react-agent-mcp.py:
+
+[source,sh,role=execute]
+----
+cat << 'EOF' > react-agent-mcp.py
+import os
+import uuid
+
+import fire
+from llama_stack_client import LlamaStackClient
+from llama_stack_client.lib.agents.react.agent import ReActAgent
+from llama_stack_client.lib.agents.react.tool_parser import ReActOutput
+from llama_stack_client.lib.agents.event_logger import EventLogger
+from termcolor import colored
+
+
+def main(host: str, port: int):
+    client = LlamaStackClient(
+        base_url=f"http://{host}:{port}"
+    )
+
+    available_models = [
+        model.identifier for model in client.models.list() if model.model_type == "llm"
+    ]
+    if not available_models:
+        print(colored("No available models. Exiting.", "red"))
+        return
+
+    selected_model = available_models[0]
+    print(colored(f"Using model: {selected_model}", "green"))
+
+    # Initialize ReActAgent with just websearch
+    agent = ReActAgent(
+        client=client,
+        model=selected_model,
+        tools=[
+            "mcp::weather",
+            ],
+        response_format={
+            "type": "json_schema",
+            "json_schema": ReActOutput.model_json_schema(),
+        },
+        sampling_params={
+            "strategy": {"type": "top_p", "temperature": 1.0, "top_p": 0.9},
+        }
+    )
+
+    session_id = agent.create_session(f"react-session-{uuid.uuid4().hex}")
+
+    user_prompts = [
+        "Find out what is the best day this week to go for a walk in New York and explain why?",
+    ]
+
+    for prompt in user_prompts:
+        print(colored(f"User> {prompt}", "blue"))
+        response = agent.create_turn(
+            messages=[{"role": "user", "content": prompt}],
+            session_id=session_id,
+            stream=True,
+        )
+
+        for log in EventLogger().log(response):
+            log.print()
+
+
+if __name__ == "__main__":
+    fire.Fire(main)
+EOF
+----
+
+== Running the Agent
+
+To run the ReAct agent against your Llama Stack instance:
+
+[source, bash]
+----
+python -m react-agent-mcp localhost 8321
+----
+
+This will:
+
+1. Connect to your Llama Stack instance on `localhost:8321`.
+2. Identify the first available LLM.
+3. Initialize the `ReActAgent` with the weather tool.
+4. Create a new session.
+5. Ask a user prompt related to weather in New York.
+6. Stream the reasoning and tool-calling output to the terminal.
+
+== Sample Output
+
+Below is an example of what the output might look like when using a model such as `meta-llama/Llama-3.2-3B-Instruct`.
+
+[source, text]
+----
+Using model: meta-llama/Llama-3.2-3B-Instruct
+User> Find out what is the best day this week to go for a walk in New York and explain why?
+inference> {
+  "thought": "To determine the best day to go for a walk in New York, I need to consider factors such as temperature, precipitation, and air quality. I will first retrieve the weather forecast for this week using the getforecast tool.",
+  "action": {
+    "tool_name": "getforecast",
+    "tool_params": [{"name": "latitude", "value": "40.7128"}, {"name": "longitude", "value": "-74.0060"}]
+  },
+  "answer": null
+}
+tool_execution> Tool:getforecast Response:{"type":"text","text":"Forecast for 40.7128, -74.0060:\n\nToday:\nTemperature: 59°F\nWind: 10 mph NE\nShowers And Thunderstorms\n---\nTonight:\nTemperature: 52°F\nWind: 10 to 15 mph NW\nChance Rain Showers\n---\nSaturday:\nTemperature: 67°F\nWind: 15 to 18 mph W\nSlight Chance Rain Showers then Sunny\n---\nSaturday Night:\nTemperature: 56°F\nWind: 8 to 14 mph NW\nMostly Clear\n---\nSunday:\nTemperature: 69°F\nWind: 10 mph NW\nSunny\n---\nSunday Night:\nTemperature: 55°F\nWind: 3 to 9 mph N\nMostly Clear\n---\nMonday:\nTemperature: 69°F\nWind: 2 to 12 mph E\nSunny\n---\nMonday Night:\nTemperature: 59°F\nWind: 6 to 12 mph SW\nPartly Cloudy\n---\nTuesday:\nTemperature: 72°F\nWind: 6 to 10 mph SW\nPartly Sunny\n---\nTuesday Night:\nTemperature: 63°F\nWind: 5 to 10 mph S\nChance Rain Showers\n---\nWednesday:\nTemperature: 68°F\nWind: 6 to 10 mph SE\nChance Rain Showers\n---\nWednesday Night:\nTemperature: 64°F\nWind: 5 to 9 mph SE\nChance Rain Showers\n---\nThursday:\nTemperature: 73°F\nWind: 7 mph E\nChance Rain Showers\n---\nThursday Night:\nTemperature: 66°F\nWind: 6 mph E\nChance Showers And Thunderstorms\n---"}
+inference> {
+  "thought": "Based on the weather forecast, the best day to go for a walk in New York is Sunday. The temperature will be around 69°F with no precipitation and sunny conditions.",
+  "action": null,
+  "answer": "Sunday"
+}
+----
+
+== Summary
+
+You've now seen how to set up a ReAct agent with Llama Stack and use the `mcp::weather` tool to make intelligent decisions. You can expand this agent with additional tools and prompt variations to support more complex workflows.
