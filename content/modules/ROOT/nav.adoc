@@ -11,5 +11,6 @@
 ** xref:elementary-02-mcp.adoc[Model Context Protocol (MCP)]
 ** xref:elementary-02-react.adoc[ReACT]
 * xref:intermediate-03.adoc[3. Intermediate]
+** xref:intermediate-03-safety.adoc[Safety Guardrails]
 * xref:advanced-04.adoc[4. Advanced]
 
