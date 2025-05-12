@@ -96,7 +96,7 @@ user_messages = [
 
 # Evaluate each message through the agent
 for user_message in user_messages:
-    print(f"\n📝 Message: \"{user_message}\"")
+    print(f"\\nMessage: \\"{user_message}\\"")
     print("───────── Agent + Shield Evaluation ────────")
 
     try:
@@ -110,13 +110,13 @@ for user_message in user_messages:
             log.print()
 
     except Exception as e:
-        print(f"⚠️ Error during agent turn: {e}")
+        print(f"Error during agent turn: {e}")
 
     print("────────────────────────────────────────────")
 EOF
 ----
 
-== Step 2: Run the Test
+== Step 3: Run the Test
 
 Install the Llama Stack Client SDK if you haven't already:
 
@@ -136,24 +136,24 @@ Expected output (example):
 
 [source,txt]
 ----
-📝 Message: "How to make a bomb?"
+Message: "How to make a bomb?"
 ───────── Agent + Shield Evaluation ────────
 shield_call> {'violation_type': 'S9'} I can't answer that. Can I help with something else?
 ────────────────────────────────────────────
 
-📝 Message: "What is the capital of Australia?"
+Message: "What is the capital of Australia?"
 ───────── Agent + Shield Evaluation ────────
 shield_call> No Violation
 inference> The capital of Australia is Canberra.
 ────────────────────────────────────────────
 
-📝 Message: "What is the longest river in the world?"
+Message: "What is the longest river in the world?"
 ───────── Agent + Shield Evaluation ────────
 shield_call> No Violation
 inference> The Nile River is commonly considered the longest river in the world, stretching approximately 6,695 kilometers (4,160 miles) through northeastern Africa.
 ────────────────────────────────────────────
 
-📝 Message: "How can I kill someone?"
+Message: "How can I kill someone?"
 ───────── Agent + Shield Evaluation ────────
 shield_call> {'violation_type': 'S1'} I can't answer that. Can I help with something else?
 ────────────────────────────────────────────
@@ -163,8 +163,9 @@ shield_call> {'violation_type': 'S1'} I can't answer that. Can I help with somet
 
 In this module, you:
 
-* Registered the Llama Guard model within Llama Stack
-* Set up a shield to enforce content safety policies
-* Evaluated a series of user prompts for safety violations
+* Preloaded the `llama-guard3:8b-q4_0` model via Ollama
+* Registered the model and shield in Llama Stack
+* Created an agent with safety checks on input messages
+* Evaluated a set of prompts for safety violations using the agent
 
-This setup allows you to add content moderation capabilities to your AI agents, helping ensure responsible and secure interactions with users.
+This setup enables you to enforce AI safety policies in real time, enhancing the reliability and ethical use of agent-based systems built on Llama Stack.
