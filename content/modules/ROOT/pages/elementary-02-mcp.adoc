@@ -13,30 +13,29 @@ In this module, you'll use a simple weather MCP server and integrate it with Lla
 * Python virtual environment setup and activated (see: xref:beginner-01-helloworld.adoc[Llama-stack Helloworld])
 
 
-== Step 1: Run a simple calculator MCP server
+== Step 1: Run a simple weather MCP server
 
 We'll use Podman to run a pre-built Weather MCP server container.
 
-[tabs]
+[tabs, subs="attributes+,+macros"]
 ====
-
-[tab]
-.Linux
+Linux::
++
 --
 [source,sh,role=execute]
 ----
 podman run -it --network host quay.io/rh-aiservices-bu/mcp-weather:0.1.0
 ----
 --
-
-[tab]
-.macOS
+macOS::
++
 --
 [source,sh,role=execute]
 ----
 podman run -p 3001:3001 quay.io/rh-aiservices-bu/mcp-weather:0.1.0
 ----
 --
+====
 
 This launches the Weather MCP server and makes it available at http://localhost:3001/sse.
 
@@ -44,11 +43,10 @@ This launches the Weather MCP server and makes it available at http://localhost:
 
 To allow Llama Stack to interact with the weather server, register it as a toolgroup:
 
-[tabs]
+[tabs, subs="attributes+,+macros"]
 ====
-
-[tab]
-.Linux
+Linux::
++
 --
 [source,sh,role=execute]
 ----
@@ -58,11 +56,8 @@ curl -X POST -H "Content-Type: application/json"
 http://localhost:8321/v1/toolgroups
 ----
 --
-[tabs]
-====
-
-[tab]
-.Mac
+macOS::
++
 --
 [source,sh,role=execute]
 ----
@@ -72,6 +67,7 @@ curl -X POST -H "Content-Type: application/json"
 http://localhost:8321/v1/toolgroups
 ----
 --
+====
 
 This step tells Llama Stack that your local weather server is available under the toolgroup ID mcp::weather.
 

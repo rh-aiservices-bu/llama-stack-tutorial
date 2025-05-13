@@ -1,0 +1,53 @@
+# Stage 1: Builder
+FROM registry.access.redhat.com/ubi8/python-312 as builder
+
+# Set working directory
+WORKDIR /app
+
+USER root
+
+# Install git and clean up
+RUN dnf install -y git && dnf clean all
+
+# Clone the repo
+RUN git clone https://github.com/meta-llama/llama-stack.git .
+
+# Set working directory to the UI folder
+WORKDIR /app/llama_stack/distribution/ui
+
+# Install Python dependencies into a virtual environment directory
+RUN python -m venv /opt/venv && \
+    . /opt/venv/bin/activate && \
+    pip install --upgrade pip && \
+    pip install -r requirements.txt
+
+# Stage 2: Runtime
+FROM registry.access.redhat.com/ubi8/python-312
+
+# Set working directory
+WORKDIR /app
+
+# Copy the app source code from builder
+COPY --from=builder /app/llama_stack/distribution/ui /app
+
+# Copy the virtual environment
+COPY --from=builder /opt/venv /opt/venv
+
+# Use the venv Python environment
+ENV PATH="/opt/venv/bin:$PATH"
+
+
+# Add the entrypoint script
+COPY entrypoint.sh /app/entrypoint.sh
+
+
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Expose Streamlit's default port
+EXPOSE 8501
+
+# Use non-root user
+USER 1001
+
+# Launch the Streamlit app
+ENTRYPOINT ["/app/entrypoint.sh"]
