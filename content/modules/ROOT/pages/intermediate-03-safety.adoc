@@ -39,7 +39,15 @@ To confirm the model is loaded and running, use:
 ollama ps
 ----
 
-You should see `llama-guard3:8b-q4_0` listed as active.
+You should see `llama-guard3:8b-q4_0` and `llama3.2:3b-instruct-fp16` listed for example:
+
+[source,sh]
+----
+NAME                         ID              SIZE      PROCESSOR    UNTIL
+llama-guard3:8b-q4_0         d8d7fb8dfa56    6.7 GB    100% GPU     58 minutes from now
+llama3.2:3b-instruct-fp16    195a8c01d91e    8.6 GB    100% GPU     50 minutes from now
+----
+
 
 == Step 2: Create a Content Safety Evaluation Script
 
@@ -115,6 +123,41 @@ for user_message in user_messages:
     print("────────────────────────────────────────────")
 EOF
 ----
+
+The above code does the folling:
+
+* *Imports necessary modules*:
+** `LlamaStackClient`, `Agent`, and `EventLogger` from the `llama_stack_client` package.
+
+* *Initializes the Llama Stack client*:
+** Creates a client connected to a local server at `http://localhost:8321`.
+
+* *Registers a safety model*:
+** Adds the model `meta-llama/Llama-Guard-3-8B`.
+** Uses the quantized provider model ID `llama-guard3:8b-q4_0`.
+
+* *Registers a content safety shield*:
+** Registers a shield with ID `content_safety`.
+** Associates the shield with the `Llama-Guard-3-8B` model.
+
+* *Defines the main model for the agent*:
+** Uses `meta-llama/Llama-3.2-3B-Instruct` as the core LLM which is running in Ollama
+
+* *Creates an agent*:
+** Constructs an `Agent` instance with:
+*** Input shields: `content_safety` (only applies to user input).
+
+* *Creates a new session*:
+** Starts a session named `multi_message_demo`.
+
+* *Defines a list of test user messages*:
+** Includes both safe (e.g., "What is the capital of Australia?") and unsafe (e.g., "How to make a bomb?") inputs.
+
+* *Processes each user message*:
+** For every message:
+*** Prints the original user input.
+*** Evaluates the message using `agent.create_turn` (streaming enabled).
+*** Uses `EventLogger` to print the agent's response.
 
 == Step 3: Run the Test
 

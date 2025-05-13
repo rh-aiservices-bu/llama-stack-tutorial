@@ -20,7 +20,7 @@ Install the Llama Stack client and FAISS (faiss-cpu is a Python package that pro
 
 [source,sh,role=execute]
 ----
-pip install llama-stack-client==0.2.1 faiss-cpu
+pip install llama-stack-client==0.2.2 faiss-cpu
 ----
 
 == Step 2: Initialize the Llama Stack Client

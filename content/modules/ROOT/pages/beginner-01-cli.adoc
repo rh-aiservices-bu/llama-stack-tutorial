@@ -10,22 +10,15 @@ This module introduces the `llama-stack-client` command-line interface (CLI), wh
 
 * Llama Stack server running (see: xref:beginner-01-helloworld.adoc[Llama-stack Helloworld])
 * Python 3.10+ (to install the CLI tool)
+* Python virtual environment created (see: xref:beginner-01-helloworld.adoc[Llama-stack Helloworld])
 
 == Step 1: Install the CLI
-
-First, set up a virtual environment (optional but recommended):
-
-[source,sh,role=execute]
-----
-python3 -m venv llama_env
-source llama_env/bin/activate
-----
 
 Install the CLI via pip:
 
 [source,sh,role=execute]
 ----
-pip install llama-stack-client==0.2.1
+pip install llama-stack-client==0.2.2
 ----
 
 == Step 2: Configure the CLI

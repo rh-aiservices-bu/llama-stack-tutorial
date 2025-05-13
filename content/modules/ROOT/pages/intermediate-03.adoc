@@ -1,3 +1,18 @@
-= Intermediate
+= Intermediate introduction
+:page-layout: lab
+:experimental:
 
-TBD
+== Goal
+
+In this section, you'll learn how to explore advanced Llama Stack features including state management, agent framework, telemetry, and guardrails, along with robust testing and evaluation workflows.
+
+== Overview
+
+This section contains the following intermediate-level module:
+
+* xref:intermediate-03-safety.adoc[Integrating Llama Guardrails for Content Safety with Llama Stack] +
+  Learn how to register Llama Guard models and apply input shields to your agents. You'll explore how to evaluate unsafe and safe prompts, review safety filtering results, and log agent responses securely.
+
+== Next Step
+
+Continue with xref:intermediate-03-safety.adoc[Integrating Llama Guardrails for Content Safety with Llama Stack] to implement content filtering using Llama Guard!

@@ -153,7 +153,7 @@ Install the Llama Stack client CLI:
 
 [source,sh,role=execute]
 ----
-pip install llama-stack-client==0.2.1
+pip install llama-stack-client==0.2.2
 ----
 
 Configure the CLI to point to your running server:
