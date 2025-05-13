@@ -11,7 +11,7 @@ content:
 
 ui:
   bundle:
-    url: https://github.com/rhpds/rhdp_showroom_theme/releases/download/v0.0.1/ui-bundle.zip
+    url: https://github.com/redhat-developer-demos/rhd-tutorial-ui/releases/download/v0.1.10/ui-bundle.zip
     snapshot: true
   supplemental_files:
     - path: ./content/supplemental-ui
@@ -27,6 +27,14 @@ antora:
   extensions:
     - require: ./content/lib/dev-mode.js
       enabled: true
+
+asciidoc:
+  attributes:
+    release-version: master
+    page-pagination: true
+  extensions:
+    - ./content/lib/tab-block.js
+    - ./content/lib/remote-include-processor.js
 
 output:
   dir: ./www
