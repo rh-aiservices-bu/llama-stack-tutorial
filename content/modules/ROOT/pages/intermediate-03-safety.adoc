@@ -116,7 +116,7 @@ for user_message in user_messages:
 EOF
 ----
 
-== Step 2: Run the Test
+== Step 3: Run the Test
 
 Install the Llama Stack Client SDK if you haven't already:
 
