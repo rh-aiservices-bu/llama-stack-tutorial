@@ -1,0 +1,20 @@
+{
+  "name": "weather",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.11.1",
+    "express": "^5.1.0",
+    "pg": "^8.14.1",
+    "zod": "^3.24.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.12.0",
+    "typescript": "^5.7.3"
+  }
+}
