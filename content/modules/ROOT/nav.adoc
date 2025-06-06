@@ -10,4 +10,5 @@
 ** xref:elementary-02-react.adoc[ReACT]
 * xref:intermediate-03.adoc[3. Intermediate]
 ** xref:intermediate-03-safety.adoc[Safety Guardrails]
+** xref:intermediate-03-telemetry.adoc[Telemetry Integration]
 * xref:advanced-04.adoc[4. Advanced]
