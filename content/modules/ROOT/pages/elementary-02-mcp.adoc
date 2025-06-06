@@ -22,18 +22,42 @@ We'll use Podman to run a pre-built Weather MCP server container.
 Linux::
 +
 --
+[tabs]
+======
+AMD64/x86_64::
++
 [source,sh,role=execute]
 ----
-podman run -it --network host quay.io/rh-aiservices-bu/mcp-weather:0.1.0
+podman run -it --network host quay.io/rh-aiservices-bu/mcp-weather:0.1.0-amd64
 ----
+
+ARM64::
++
+[source,sh,role=execute]
+----
+podman run -it --network host quay.io/rh-aiservices-bu/mcp-weather:0.1.0-arm64
+----
+======
 --
 macOS::
 +
 --
+[tabs]
+======
+Intel Macs (AMD64)::
++
 [source,sh,role=execute]
 ----
-podman run -p 3001:3001 quay.io/rh-aiservices-bu/mcp-weather:0.1.0
+podman run -p 3001:3001 quay.io/rh-aiservices-bu/mcp-weather:0.1.0-amd64
 ----
+
+Apple Silicon Macs (ARM64/M1/M2/M3)::
++
+[source,sh,role=execute]
+----
+podman run -p 3001:3001 quay.io/rh-aiservices-bu/mcp-weather:0.1.0-arm64
+----
+======
 --
 ====
 
