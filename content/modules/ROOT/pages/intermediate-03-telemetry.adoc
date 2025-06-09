@@ -51,7 +51,7 @@ podman run --rm --name jaeger \
            jaegertracing/jaeger:2.1.0
 ----
 
-Once running, open your browser and navigate to `http://localhost:16686` to access the Jaeger UI and begin visualizing your traces. From here, you can search for traces, view their details, and analyze the performance of your Llama Stack applications.
+Once running, open your browser and navigate to http://localhost:16686[window=_blank] to access the Jaeger UI and begin visualizing your traces. From here, you can search for traces, view their details, and analyze the performance of your Llama Stack applications.
 
 But first, you need to start the Llama Stack server with telemetry enabled. So be patient and follow the next steps to set up the Llama Stack server with telemetry features.
 
