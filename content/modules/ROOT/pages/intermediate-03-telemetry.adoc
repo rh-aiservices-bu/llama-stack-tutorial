@@ -8,7 +8,7 @@ In this module, you'll explore how to enable and use the telemetry system built 
 
 == Prerequisites
 
-* Llama3.2 model loaded and running (see: xref:beginner-01-helloworld.adoc[Llama-stack Helloworld])
+* Llama model loaded and running (see: xref:beginner-01-helloworld.adoc[Llama-stack Helloworld])
 * Python 3.10+ installed on your local machine
 * Python virtual environment setup and activated (see: xref:beginner-01-helloworld.adoc[Llama-stack Helloworld])
 
@@ -18,18 +18,16 @@ Llama Stack includes a built-in telemetry system that offers detailed **observab
 
 === Key Concepts
 
-**Spans**: A *span* represents a single operation within a system, capturing information such as start time, duration, and contextual metadata. Spans can be nested to represent parent-child relationships between operations.
+* **Spans**: A *span* represents a single operation within a system, capturing information such as start time, duration, and contextual metadata. Spans can be nested to represent parent-child relationships between operations.
 
-**Traces**: A *trace* is a collection of spans that together represent the execution flow of a single request or task, providing a full picture of how a process unfolds across components.
+* **Traces**: A *trace* is a collection of spans that together represent the execution flow of a single request or task, providing a full picture of how a process unfolds across components.
 
 === Supported Telemetry Sinks
 
 The Llama Stack telemetry system can export data to several destinations, known as *sinks*. These include:
 
 - **OpenTelemetry (OTel)**: Sends traces and metrics to an OpenTelemetry Collector, which can be visualized in tools like **Jaeger** or **Grafana**. Useful for real-time observability across distributed systems.
-
 - **SQLite**: Stores telemetry events locally in a SQLite database file.
-
 - **Console**: Prints logs, spans, and metrics directly to the terminal or standard output. This is particularly helpful during development or for debugging locally.
 
 == Step 1: Install Jaeger for Tracing
@@ -59,7 +57,7 @@ But first, you need to start the Llama Stack server with telemetry enabled. So b
 
 == Step 2: Start the Llama Stack Server with Telemetry configured
 
-To enable telemetry in Llama Stack, you need to start the Llama Stack server with some specific runtime configurations. The [Llama Stack runtime configuration](https://llama-stack.readthedocs.io/en/latest/distributions/configuration.html) can be specified as a YAML file.
+To enable telemetry in Llama Stack, you need to start the Llama Stack server with some specific runtime configurations. The https://llama-stack.readthedocs.io/en/latest/distributions/configuration.html[Llama Stack runtime configuration] can be specified as a YAML file.
 
 First, export the necessary environment variables:
 
@@ -75,7 +73,7 @@ Next, download the Llama Stack runtime configuration file from the repository. T
 
 [source,sh,role=execute]
 ----
-wget https://raw.githubusercontent.com/rh-aiservices-bu/llama-stack-tutorial/main/apps/telemetry/run-otel.yaml -O run-otel.yaml
+wget https://raw.githubusercontent.com/rh-aiservices-bu/llama-stack-tutorial/main/apps/telemetry/run-otel.yaml -O ~/run-otel.yaml
 export LLAMA_STACK_CONFIG_FILE=~/run-otel.yaml
 ----
 
@@ -123,12 +121,13 @@ Here’s an example that sends telemetry signals to Console Output and OpenTelem
   - provider_id: meta-reference
     provider_type: inline::meta-reference
     config:
-      sinks: ['console', 'sqlite']
+      sinks: ['console', 'sqlite', 'otel_trace', 'otel_metric']
       otel_trace_endpoint: "http://host.containers.internal:4318/v1/traces"
       otel_metric_endpoint: "http://host.containers.internal:4318/v1/metrics"
+      sqlite_db_path: "/var/tmp/telemetry.db"
 ----
 
-To enable sqlite telemetry or know more, check the [LLamaStack Configuration Documentation example](https://llama-stack.readthedocs.io/en/latest/building_applications/telemetry.html#configuration) that sends telemetry signals to all three sinks types.
+To know more, check the https://llama-stack.readthedocs.io/en/latest/building_applications/telemetry.html#configuration[LLamaStack Configuration Documentation].
 
 == Step 4: Testing Llama Stack Console Telemetry
 
@@ -207,43 +206,21 @@ for prompt in user_prompts:
     for log in EventLogger().log(response):
         log.print()
 
-# TELEMETRY: print trace spans for session
+## TELEMETRY ## -> print trace spans for session
 print(f"\n📡 Getting traces for session_id={session_id}")
 agent_logs = []
 
 for span in client.telemetry.query_spans(
-    attribute_filters=[{"key": "session_id", "op": "eq", "value": session_id}],
-    attributes_to_return=["trace_id", "span_id", "input", "output"],
+        attribute_filters=[
+            {"key": "session_id", "op": "eq", "value": session_id},
+        ],
+        attributes_to_return=["input", "output"],
 ):
-    if span.attributes.get("output") != "no shields":
-        agent_logs.append(span.attributes)
+        if span.attributes["output"] != "no shields":
+            agent_logs.append(span.attributes)
 
 print("\n📋 Here are examples of traces:")
 pprint(agent_logs[:2])
-
-# TELEMETRY: Registering a custom telemetry event
-if agent_logs:
-    trace_id = agent_logs[0]["trace_id"]
-    span_id = agent_logs[0]["span_id"]
-
-    client.telemetry.log_event(
-        event={
-            "trace_id": trace_id,
-            "span_id": span_id,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "event_type": "custom.debug",
-            "message": "✅ Custom telemetry event successfully linked to real span",
-            "severity": "info",
-            "attributes": {
-                "session_id": session_id,
-                "component": "custom_telemetry_test",
-            },
-        },
-        ttl_seconds=3600,
-    )
-    print("✅ Event successfully logged and attached to trace/span.")
-else:
-    print("⚠️ No valid spans found to attach telemetry event.")
 EOF
 ----
 
@@ -255,9 +232,10 @@ The `test_console_telemetry.py` script does the following:
 - Sends a prompt to the agent
 - Logs and prints telemetry data associated with the request
 - Retrieves spans linked to the session and prints trace data
-- Demonstrates custom telemetry event logging tied to an existing span
 
-== Step 3: Run the Test
+== Step 5: Test the Telemetry Script
+
+To test the telemetry integration, you can run the provided Python script `test_console_telemetry.py`. As described before, this script will interact with the Llama Stack server, send a prompt, and print out the telemetry data collected during the session.
 
 Install the Llama Stack Client SDK if you haven't already:
 
@@ -270,8 +248,48 @@ Then run the script:
 
 [source,sh,role=execute]
 ----
-python test_safety.py localhost 8321
+chmod +x test_console_telemetry.py
+python test_console_telemetry.py localhost 8321
 ----
+
+You should see output similar to the following, which includes the telemetry data collected during the session:
+
+[source, text]
+----
+inference> This function uses recursion to calculate the factorial of a number. It works by multiplying the input number `n` with the factorial of `n-1`. If `n` is 0, it returns 1 (since the factorial of 0 is defined as 1). 
+
+Please note that this recursive implementation has an exponential time complexity due to repeated computations in each recursive call. For larger numbers, an iterative solution would be more efficient using a loop to avoid redundant calculations.
+
+📡 Getting traces for session_id=a75ee999-5c9c-425f-84d2-2643ad809850
+
+📋 Here are examples of traces:
+[
+│   {
+│   │   'input': '[{"role": "system", "content": "You are a helpful assistant"}, {"role": "user", "content": "Write a Python function to calculate the factorial of a number.", "context": null}]',
+│   │   'output': '{"content": "", "tool_calls": [{"call_id": "4b545590-cddd-4513-8112-080ca508c4dd", "tool_name": "code_interpreter", "arguments": {"code": "def factorial(n):\\n    if n == 0:\\n        return 1\\n    else:\\n        return n * factorial(n-1)"}, "arguments_json": "{\\"code\\": \\"def factorial(n):\\\\n    if n == 0:\\\\n        return 1\\\\n    else:\\\\n        return n * factorial(n-1)\\"}"}]}'
+│   },
+│   {
+│   │   'input': '{"role":"assistant","content":"","stop_reason":"end_of_turn","tool_calls":[{"call_id":"4b545590-cddd-4513-8112-080ca508c4dd","tool_name":"code_interpreter","arguments":{"code":"def factorial(n):\\n    if n == 0:\\n        return 1\\n    else:\\n        return n * factorial(n-1)"},"arguments_json":"{\\"code\\": \\"def factorial(n):\\\\n    if n == 0:\\\\n        return 1\\\\n    else:\\\\n        return n * factorial(n-1)\\"}"}]}',
+│   │   'output': '{"role":"tool","call_id":"4b545590-cddd-4513-8112-080ca508c4dd","content":"completed\\n[stderr]\\nbwrap: Creating new namespace failed, likely because the kernel does not support user namespaces.  bwrap must be installed setuid on such systems.\\n[/stderr]"}'
+│   }
+]
+----
+
+== Step 6: Explore the Telemetry Data in Jaeger
+Now that you have run the telemetry script, you can visualize the trace data in Jaeger.
+
+* 1. Open your browser and navigate to `http://localhost:16686`.
+* 2. In the Jaeger UI, check the Service and modify the Lookback for the last 5/15 minutes.
+
+image::llama-stack-telemetry-1.png[Llama-Stack Telemetry 1, width=800]
+
+* 3. Click on the `create_agent_turn` span to view the trace details:
+
+image::llama-stack-telemetry-2.png[Llama-Stack Telemetry 2, width=800]
+
+* 4. Click on a trace to view its details, including spans, logs, and metrics:
+
+image::llama-stack-telemetry-3.png[Llama-Stack Telemetry 3, width=800]
 
 == Summary
 
@@ -282,5 +300,6 @@ In this module, you:
 * Explored the telemetry system's core concepts: spans, traces, logs, and metrics
 * Used the Llama Stack Client SDK to send prompts and analyze the generated telemetry
 * Retrieved span data for a session and attached custom telemetry events
+* Visualized the telemetry data in Jaeger to understand the execution flow and performance of your AI applications
 
 This telemetry integration provides the observability backbone necessary for production-grade AI applications, enabling enhanced debugging, monitoring, and auditing capabilities.

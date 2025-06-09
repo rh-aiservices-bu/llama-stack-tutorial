@@ -41,11 +41,10 @@ providers:
   - provider_id: meta-reference
     provider_type: inline::meta-reference
     config:
-      # sinks: ['console', 'sqlite', 'otel_trace']
-      sinks: ['console', 'otel_trace']
+      sinks: ['console', 'sqlite', 'otel_trace', 'otel_metric']
       otel_trace_endpoint: "http://host.containers.internal:4318/v1/traces"
       otel_metric_endpoint: "http://host.containers.internal:4318/v1/metrics"
-      # sqlite_db_path: "/var/tmp/telemetry.db"
+      sqlite_db_path: "/var/tmp/telemetry.db"
   eval:
   - provider_id: meta-reference
     provider_type: inline::meta-reference
