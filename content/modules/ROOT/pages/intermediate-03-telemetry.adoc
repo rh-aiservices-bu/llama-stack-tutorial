@@ -1,4 +1,4 @@
-= Integrating Telemetry in Llama Stack for tracing, metrics and logging capabilities
+= Integrating Telemetry in Llama Stack for Tracing, Metrics, and Logging
 :page-layout: lab
 :experimental:
 
@@ -55,7 +55,7 @@ Once running, open your browser and navigate to `http://localhost:16686` to acce
 
 But first, you need to start the Llama Stack server with telemetry enabled. So be patient and follow the next steps to set up the Llama Stack server with telemetry features.
 
-== Step 2: Start the Llama Stack Server with Telemetry configured
+== Step 2: Start the Llama Stack Server with Telemetry Enabled
 
 To enable telemetry in Llama Stack, you need to start the Llama Stack server with some specific runtime configurations. The https://llama-stack.readthedocs.io/en/latest/distributions/configuration.html[Llama Stack runtime configuration] can be specified as a YAML file.
 
