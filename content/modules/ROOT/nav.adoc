@@ -12,3 +12,5 @@
 ** xref:intermediate-03-safety.adoc[Safety Guardrails]
 ** xref:intermediate-03-telemetry.adoc[Telemetry Integration]
 * xref:advanced-04.adoc[4. Advanced]
+** xref:advanced-04-eval.adoc[Llama Stack Evaluation and Telemetry]
+** xref:advanced-04-all-in-one.adoc[Running All-in-One Llama Stack]

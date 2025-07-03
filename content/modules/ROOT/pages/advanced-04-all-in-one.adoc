@@ -1,0 +1,102 @@
+= Running All-in-One Llama Stack
+:page-layout: lab
+:experimental:
+
+== Goal
+
+Learn how to quickly deploy and run the complete Llama Stack with all features enabled using our streamlined all-in-one setup.
+
+== Overview
+
+Want to quickly try the complete Llama Stack? Use our all-in-one setup that provides a full-featured environment with safety, telemetry, and tools in minutes.
+
+== Quick Start
+
+Get the complete Llama Stack running with one command:
+
+[source,bash]
+----
+make all
+----
+
+This starts:
+
+* 🤖 **Llama Stack** with safety shields (llama-guard)
+* 🌤️ **Weather tools** via Model Context Protocol (MCP)
+* 📊 **Telemetry** with Jaeger tracing
+* 🎮 **Web playground** at http://localhost:8502
+
+== Prerequisites
+
+Before starting, ensure you have:
+
+* https://podman.io/[Podman] or Docker installed
+* https://ollama.ai/[Ollama] with the required models:
+
+[source,bash]
+----
+ollama pull llama3.2:3b-instruct-fp16
+ollama pull llama-guard3:8b-q4_0
+ollama pull all-minilm:latest
+----
+
+== Available Commands
+
+The following commands are available for managing your Llama Stack deployment:
+
+[cols="1,2"]
+|===
+|Command |Description
+
+|`make all`
+|Start complete stack with playground
+
+|`make run-all`
+|Start Llama Stack services
+
+|`make start-playground`
+|Start web playground
+
+|`make stop`
+|Stop all containers (preserve data)
+
+|`make clean`
+|Remove all data and containers
+
+|`make status`
+|Show configuration
+|===
+
+== Configuration
+
+Customize your setup by modifying these variables in the Makefile:
+
+[source,makefile]
+----
+INFERENCE_MODEL = meta-llama/Llama-3.2-3B-Instruct
+SAFETY_MODEL_ID = meta-llama/Llama-Guard-3-8B  
+OLLAMA_URL = http://host.containers.internal:11434
+LLAMA_STACK_PORT = 8321
+----
+
+== What's Included
+
+The all-in-one setup provides:
+
+* **Safety First**: Built-in content filtering with Llama Guard
+* **Observability**: Complete telemetry with OpenTelemetry and Jaeger
+* **Extensible**: Weather tools via MCP, easily add more
+* **Production Ready**: Parameterized configs for different environments
+* **Developer Friendly**: One command setup, clean teardown
+
+== Access Points
+
+Once running, you can access:
+
+* **Web Playground**: http://localhost:8502
+* **Llama Stack API**: http://localhost:8321
+* **Jaeger Telemetry**: http://localhost:16686
+
+== Next Steps
+
+Now that you have the complete stack running, explore the individual tutorials to understand each component in detail, or start experimenting directly in the playground!
