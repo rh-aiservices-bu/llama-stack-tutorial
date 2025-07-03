@@ -13,4 +13,4 @@ The tutorial is divided into four sections:
 * xref:beginner-01.adoc[1. Beginner]
 * xref:elementary-02.adoc[2. Elementary]
 * xref:intermediate-03.adoc[3. Intermediate]
-* xref:advaned-04.adoc[4. Advanced]
+* xref:advanced-04.adoc[4. Advanced]
