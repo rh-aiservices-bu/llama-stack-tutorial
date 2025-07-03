@@ -216,7 +216,7 @@ for span in client.telemetry.query_spans(
         ],
         attributes_to_return=["input", "output"],
 ):
-        if span.attributes["output"] != "no shields":
+        if span.attributes["output"] !=º "no shields":
             agent_logs.append(span.attributes)
 
 print("\n📋 Here are examples of traces:")
