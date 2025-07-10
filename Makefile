@@ -12,7 +12,7 @@ LLAMA_STACK_CONFIG_FILE ?= $(PWD)/apps/all-in-one/run-all.yaml
 
 # Default target
 .PHONY: all
-all: run-all start-playground
+all: run-all start-playground register-mcp
 
 # Start Jaeger for telemetry
 .PHONY: start-jaeger
