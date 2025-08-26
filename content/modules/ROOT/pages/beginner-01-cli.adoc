@@ -18,7 +18,9 @@ Install the CLI via pip:
 
 [source,sh,role=execute]
 ----
-pip install llama-stack-client==0.2.2
+pip install fire==0.7.1
+pip install requests==2.32.5
+pip install llama-stack-client==0.2.8
 ----
 
 == Step 2: Configure the CLI
@@ -35,6 +37,7 @@ Example interaction:
 [source,txt]
 ----
 > Enter the endpoint of the Llama Stack distribution server: http://localhost:8321
+> Enter the API key (leave empty if no key is needed): <<leave empty>>
 
 Done! You can now use the Llama Stack Client CLI with endpoint http://localhost:8321
 ----

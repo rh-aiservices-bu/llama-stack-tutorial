@@ -79,7 +79,7 @@ Linux::
 [source,sh,role=execute]
 ----
 podman run -it --network host \
-  llamastack/distribution-ollama:0.2.0 \
+  llamastack/distribution-ollama:0.2.9 \
   --port $LLAMA_STACK_PORT \
   --env INFERENCE_MODEL=$LLAMA_STACK_MODEL \
   --env OLLAMA_URL=http://localhost:11434
@@ -93,7 +93,7 @@ macOS::
 ----
 podman run -it \
   -p $LLAMA_STACK_PORT:$LLAMA_STACK_PORT \
-  llamastack/distribution-ollama:0.2.0 \
+  llamastack/distribution-ollama:0.2.9 \
   --port $LLAMA_STACK_PORT \
   --env INFERENCE_MODEL=$LLAMA_STACK_MODEL \
   --env OLLAMA_URL=http://host.containers.internal:11434
@@ -151,7 +151,9 @@ Install the Llama Stack client CLI:
 
 [source,sh,role=execute]
 ----
-pip install llama-stack-client==0.2.2
+pip install fire==0.7.1
+pip install requests==2.32.5
+pip install llama-stack-client==0.2.8
 ----
 
 Configure the CLI to point to your running server:
