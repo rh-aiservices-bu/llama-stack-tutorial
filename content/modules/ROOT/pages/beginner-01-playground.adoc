@@ -18,36 +18,41 @@ Before starting, ensure you have the following:
 
 You can deploy the playground using the https://llama-stack.readthedocs.io/en/latest/playground/index.html[source code] or run the pre-built container image from Quay.io:
 
+[tabs, subs="attributes+,+macros"]
+====
+Linux::
++
+--
 [source,sh,role=execute]
 ----
-podman run -p 8501:8501 \
-  -e LLAMA_STACK_ENDPOINT=http://host.containers.internal:8321 \
+podman run -p 8322:8322 --network host \
+  -e LLAMA_STACK_BACKEND_URL=http://localhost:8321 \
   quay.io/rh-aiservices-bu/llama-stack-playground:0.2.1
 ----
+--
 
-Once the container is running, the Llama-Stack playground will be available at `http://localhost:8501`.
+macOS::
++
+--
+[source,sh,role=execute]
+----
+podman run -p 8322:8322 \
+  -e LLAMA_STACK_BACKEND_URL=http://host.containers.internal:8321 \
+  quay.io/rh-aiservices-bu/llama-stack-playground:0.2.18
+----
+--
+====
+
+
+Once the container is running, the Llama-Stack playground will be available at `http://localhost:8322`.
 
 == Step 2: Interact with the Playground Chat
 
-The Llama-Stack Playground is built with Streamlit and includes a chat interface for interacting with the Llama Stack server.
+The Llama-Stack Playground is built with TypeScript and includes a chat interface for interacting with the Llama Stack server.
 
-Open your browser and navigate to `http://localhost:8501`. You’ll see a chat interface where you can enter prompts and receive responses from the deployed LLM model.
+Open your browser and navigate to `http://localhost:8322/chat-playground`. You’ll see a chat interface where you can enter prompts and receive responses from the deployed LLM model.
 
 image::llama-stack-dashboard.png[Llama-Stack Dashboard, width=800]
-
-== Step 3: Explore the Playground
-
-The playground also allows you to explore available resources, such as models, vector databases, and shields.
-
-To browse these:
-
-* Click the "Resources" tab to view all registered components in your Llama Stack setup.
-
-image::llama-stack-dashboard3.png[Resources, width=800]
-
-* Click the "API Providers" tab to inspect configured model and embedding providers.
-
-image::llama-stack-dashboard2.png[API Providers, width=800]
 
 == Summary
 
