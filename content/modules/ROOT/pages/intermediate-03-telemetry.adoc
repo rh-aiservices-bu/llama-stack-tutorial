@@ -57,7 +57,7 @@ But first, you need to start the Llama Stack server with telemetry enabled. So b
 
 == Step 2: Start the Llama Stack Server with Telemetry Enabled
 
-To enable telemetry in Llama Stack, you need to start the Llama Stack server with some specific runtime configurations. The https://llama-stack.readthedocs.io/en/latest/distributions/configuration.html[Llama Stack runtime configuration] can be specified as a YAML file.
+To enable telemetry in Llama Stack, you need to start the Llama Stack server with some specific runtime configurations. The https://llama-stack.readthedocs.io/en/latest/distributions/configuration.html[Llama Stack runtime configuration,window=_blank] can be specified as a YAML file.
 
 First, export the necessary environment variables:
 
