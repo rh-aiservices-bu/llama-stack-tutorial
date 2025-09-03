@@ -86,7 +86,7 @@ podman run -it --rm \
   -e INFERENCE_MODEL=$LLAMA_STACK_MODEL \
   -e OLLAMA_URL=http://host.containers.internal:11434 \
   -v $LLAMA_STACK_CONFIG_FILE:/root/my-run.yaml:ro \
-  llamastack/distribution-ollama:0.2.0 \
+  llamastack/distribution-ollama:0.2.9 \
   --port $LLAMA_STACK_PORT \
   --yaml-config /root/my-run.yaml
 ----
@@ -241,7 +241,7 @@ Install the Llama Stack Client SDK if you haven't already:
 
 [source,sh,role=execute]
 ----
-pip install llama-stack-client==0.2.2
+pip install llama-stack-client==0.2.8
 ----
 
 Then run the script:

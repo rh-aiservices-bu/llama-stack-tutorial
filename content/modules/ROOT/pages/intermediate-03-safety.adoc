@@ -165,7 +165,7 @@ Install the Llama Stack Client SDK if you haven't already:
 
 [source,sh,role=execute]
 ----
-pip install llama-stack-client==0.2.2
+pip install llama-stack-client==0.2.8
 ----
 
 Then run the script:
