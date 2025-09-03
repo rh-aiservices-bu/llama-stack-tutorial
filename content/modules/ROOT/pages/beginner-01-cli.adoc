@@ -105,7 +105,7 @@ Sample output:
 
 [source,sh]
 ----
-VersionInfo(version='0.2.0')
+VersionInfo(version='0.2.9')
 ----
 
 == Step 6: List Providers

@@ -27,7 +27,7 @@ Linux::
 ----
 podman run -p 8322:8322 --network host \
   -e LLAMA_STACK_BACKEND_URL=http://localhost:8321 \
-  quay.io/rh-aiservices-bu/llama-stack-playground:0.2.1
+  quay.io/rh-aiservices-bu/llama-stack-playground:0.2.18
 ----
 --
 
