@@ -1,7 +1,514 @@
-= Llama Stack Evaluation
+= Evaluating Llama Stack Models with Built-in Evaluation Framework
 :page-layout: lab
 :experimental:
 
 == Goal
 
-TBD
+We need to evaluate our models and applications before they go into production to ensure they 
+perform reliably and meet quality standards. 
+
+Llama Stack provides a comprehensive evaluation framework with three core APIs:
+
+* `/datasetio` + `/datasets` API for managing evaluation datasets
+* `/scoring` + `/scoring_functions` API for running scoring functions  
+* `/eval` + `/benchmarks` API for comprehensive evaluation workflows
+
+In this tutorial, you'll learn to run prompts and expected answers through different evaluations to verify that models answer as expected. The evaluation data can be custom examples you create or real datasets from sources like HuggingFace.
+
+You'll explore two primary evaluation methods:
+
+* **subset_of**: Tests if the LLM output contains the expected answer as an exact substring: fast but strict (case-sensitive)
+* **llm_as_judge**: Uses an LLM to evaluate semantic similarity between generated and expected answers: more flexible but requires additional inference
+
+This hands-on approach will show you how to systematically evaluate model performance and identify potential issues before deployment.
+
+== Prerequisites
+
+* Llama Stack server running (see: xref:beginner-01-helloworld.adoc[Llama-stack Helloworld])
+* Python environment with virtual environment activated
+
+== Understanding Evaluation Methods
+
+* **subset_of**: Fast but strict. Checks if expected answer appears exactly in generated answer (case-sensitive)
+* **llm_as_judge**: More flexible. Uses LLM to evaluate semantic similarity between answers
+
+== Step 1: Setup and Basic Evaluation
+
+Install the client and create our first evaluation:
+
+[source,sh,role=execute]
+----
+pip install llama-stack-client==0.2.8
+----
+
+Create and run a basic evaluation script:
+
+[source,sh,role=execute]
+----
+cat << 'EOF' > eval_basic.py
+from llama_stack_client import LlamaStackClient
+import pprint
+
+# Connect to Llama Stack
+client = LlamaStackClient(
+    base_url="http://localhost:8321",
+    timeout=600.0
+)
+
+# Create evaluation examples
+handmade_eval_rows = [
+    {
+        "input_query": "What is the capital of France?",
+        "generated_answer": "The capital of France is Paris.",
+        "expected_answer": "Paris",
+    },
+    {
+        "input_query": "Who wrote Romeo and Juliet?",
+        "generated_answer": "William Shakespeare wrote Romeo and Juliet.",
+        "expected_answer": "shakespeare",  # lowercase - will fail!
+    },
+    {
+        "input_query": "What is 2 + 2?",
+        "generated_answer": "The answer is 4.",
+        "expected_answer": "4",
+    }
+]
+
+print("📝 Testing subset_of evaluation:")
+pprint.pprint(handmade_eval_rows)
+
+# Run subset_of evaluation
+scoring_response = client.scoring.score(
+    input_rows=handmade_eval_rows,
+    scoring_functions={"basic::subset_of": None}
+)
+
+print("\n📊 Results:")
+pprint.pprint(scoring_response)
+
+# Show accuracy
+results = scoring_response.results['basic::subset_of']
+accuracy = results.aggregated_results['accuracy']['accuracy']
+print(f"\n📈 Accuracy: {accuracy:.1%}")
+EOF
+
+python eval_basic.py
+----
+
+Expected output:
+[source, text]
+----
+📝 Testing subset_of evaluation:
+[{'expected_answer': 'Paris',
+  'generated_answer': 'The capital of France is Paris.',
+  'input_query': 'What is the capital of France?'},
+ {'expected_answer': 'shakespeare',
+  'generated_answer': 'William Shakespeare wrote Romeo and Juliet.',
+  'input_query': 'Who wrote Romeo and Juliet?'},
+ {'expected_answer': '4',
+  'generated_answer': 'The answer is 4.',
+  'input_query': 'What is 2 + 2?'}]
+
+📊 Results:
+ScoringScoreResponse(results={'basic::subset_of': ScoringResult(aggregated_results={'accuracy': {'accuracy': 0.6666666666666666, 'num_correct': 2.0, 'num_total': 3}}, score_rows=[{'score': 1.0}, {'score': 0.0}, {'score': 1.0}])})
+
+📈 Accuracy: 66.7%
+----
+
+You see 2/3 answers correct. But wait - the Shakespeare answer is actually correct, right? The model correctly identified William Shakespeare as the author of Romeo and Juliet. So what happened?
+
+The way `subset_of` works is by searching for the exact expected answer as a substring within the generated response. It looks for "shakespeare" (lowercase) inside "William Shakespeare wrote Romeo and Juliet" but finds "Shakespeare" (capitalized) instead. Since the search is case-sensitive, it fails even though the answer is semantically correct. This demonstrates a key limitation of exact string matching evaluation.
+
+== Step 2: LLM-as-Judge Evaluation
+
+Now let's use an LLM judge to handle the case sensitivity issue. 
+
+**Important note**: In production, you should typically use a different, more capable model as the judge than the one being evaluated. Models with stronger reasoning capabilities like Llama 3.3 70B, Llama 405B, or Deepseek R1 make better judges. For this tutorial, we're using the same model (Llama 3.2 3B) for both generation and judging to keep things simple, but this "self-judging" approach is not ideal for production evaluation.
+
+[source,sh,role=execute]
+----
+cat << 'EOF' > eval_judge.py
+from llama_stack_client import LlamaStackClient
+import pprint
+
+# Connect to Llama Stack
+client = LlamaStackClient(
+    base_url="http://localhost:8321",
+    timeout=600.0
+)
+
+# Get available model for judging
+available_models = [
+    model.identifier for model in client.models.list() if model.model_type == "llm"
+]
+judge_model = available_models[0]
+
+# Same evaluation examples
+handmade_eval_rows = [
+    {
+        "input_query": "What is the capital of France?",
+        "generated_answer": "The capital of France is Paris.",
+        "expected_answer": "Paris",
+    },
+    {
+        "input_query": "Who wrote Romeo and Juliet?",
+        "generated_answer": "William Shakespeare wrote Romeo and Juliet.",
+        "expected_answer": "shakespeare",
+    },
+    {
+        "input_query": "What is 2 + 2?",
+        "generated_answer": "The answer is 4.",
+        "expected_answer": "4",
+    }
+]
+
+# Judge prompt
+JUDGE_PROMPT = """
+Given a QUESTION and GENERATED_RESPONSE and EXPECTED_RESPONSE.
+
+Compare the factual content. Ignore differences in style, grammar, or punctuation.
+Answer by selecting one option:
+(A) The GENERATED_RESPONSE is a subset of the EXPECTED_RESPONSE and is fully consistent.
+(B) The GENERATED_RESPONSE is a superset of the EXPECTED_RESPONSE and is fully consistent.
+(C) The GENERATED_RESPONSE contains all the same details as the EXPECTED_RESPONSE.
+(D) There is a disagreement between the responses.
+(E) The answers differ, but these differences don't matter factually.
+
+Format: "Answer: One of ABCDE, Explanation: "
+
+QUESTION: {input_query}
+GENERATED_RESPONSE: {generated_answer}
+EXPECTED_RESPONSE: {expected_answer}
+"""
+
+print(f"🤖 Testing LLM-as-judge with {judge_model}:")
+
+# Run LLM-as-judge evaluation
+scoring_response = client.scoring.score(
+    input_rows=handmade_eval_rows,
+    scoring_functions={
+        "llm-as-judge::base": {
+            "judge_model": judge_model,
+            "prompt_template": JUDGE_PROMPT,
+            "type": "llm_as_judge",
+            "judge_score_regexes": ["Answer: (A|B|C|D|E)"],
+        }
+    }
+)
+
+print("\n📊 Results:")
+for i, score_row in enumerate(scoring_response.results['llm-as-judge::base'].score_rows):
+    print(f"\n{i+1}. {handmade_eval_rows[i]['input_query']}")
+    print(f"   Score: {score_row['score']}")
+    print(f"   Reasoning: {score_row['judge_feedback']}")
+EOF
+
+python eval_judge.py
+----
+
+Expected output:
+[source, text]
+----
+🤖 Testing LLM-as-judge with meta-llama/Llama-3.2-3B-Instruct:
+
+📊 Results:
+
+1. What is the capital of France?
+   Score: C
+   Reasoning: Answer: C, Explanation: The GENERATED_RESPONSE and EXPECTED_RESPONSE contain exactly the same factual information.
+
+2. Who wrote Romeo and Juliet?
+   Score: A
+   Reasoning: Answer: A, Explanation: The GENERATED_RESPONSE contains the full name "William Shakespeare", while the EXPECTED_RESPONSE only contains the last name "shakespeare". However, they both convey the same factual information that William Shakespeare is the author of Romeo and Juliet.
+
+3. What is 2 + 2?
+   Score: C
+   Reasoning: Answer: C, Explanation: The GENERATED_RESPONSE and EXPECTED_RESPONSE contain the same numerical value, which is 4.
+----
+
+The LLM judge handles the "shakespeare" case much better, recognizing semantic equivalence despite capitalization.
+
+== Step 3: Dataset-based Evaluation
+
+Test with a real dataset to see how the model performs on knowledge questions:
+
+[source,sh,role=execute]
+----
+cat << 'EOF' > eval_dataset.py
+from llama_stack_client import LlamaStackClient
+import pprint
+
+# Connect to Llama Stack
+client = LlamaStackClient(
+    base_url="http://localhost:8321",
+    timeout=600.0
+)
+
+# Get model
+available_models = [
+    model.identifier for model in client.models.list() if model.model_type == "llm"
+]
+model_id = available_models[0]
+
+# Register SimpleQA dataset
+print("📚 Registering SimpleQA dataset...")
+client.datasets.register(
+    purpose="eval/messages-answer",
+    source={
+        "type": "uri",
+        "uri": "huggingface://datasets/llamastack/simpleqa?split=train",
+    },
+    dataset_id="huggingface::simpleqa",
+)
+
+# Get sample questions
+eval_rows = client.datasets.iterrows(
+    dataset_id="huggingface::simpleqa",
+    limit=3,
+)
+
+print("\n📋 Sample questions:")
+for i, row in enumerate(eval_rows.data):
+    print(f"{i+1}. {row['input_query']}")
+    print(f"   Expected: {row['expected_answer']}")
+
+# Register benchmark
+client.benchmarks.register(
+    benchmark_id="meta-reference::simpleqa",
+    dataset_id="huggingface::simpleqa",
+    scoring_functions=["llm-as-judge::base"],
+)
+
+# Evaluate model
+print(f"\n🤖 Evaluating {model_id} on knowledge questions...")
+response = client.eval.evaluate_rows(
+    benchmark_id="meta-reference::simpleqa",
+    input_rows=eval_rows.data,
+    scoring_functions=["llm-as-judge::base"],
+    benchmark_config={
+        "eval_candidate": {
+            "type": "model",
+            "model": model_id,
+            "sampling_params": {
+                "strategy": {"type": "greedy"},
+                "max_tokens": 512,
+            },
+        },
+    },
+)
+
+print("\n📊 Results:")
+for i, gen in enumerate(response.generations):
+    score = response.scores['llm-as-judge::base'].score_rows[i]
+    print(f"\n{i+1}. Question: {eval_rows.data[i]['input_query']}")
+    print(f"   Expected: {eval_rows.data[i]['expected_answer']}")
+    print(f"   Generated: {gen['generated_answer']}")
+    print(f"   Score: {score['score']}")
+EOF
+
+python eval_dataset.py
+----
+
+Expected output:
+[source, text]
+----
+📚 Registering SimpleQA dataset...
+
+📋 Sample questions:
+1. Who received the IEEE Frank Rosenblatt Award in 2010?
+   Expected: Michio Sugeno
+2. Who was awarded the Oceanography Society's Jerlov Award in 2018?
+   Expected: Annick Bricaud
+3. What's the name of the women's liberal arts college in Cambridge, Massachusetts?
+   Expected: Radcliffe College
+
+🤖 Evaluating meta-llama/Llama-3.2-3B-Instruct on knowledge questions...
+
+📊 Results:
+
+1. Question: Who received the IEEE Frank Rosenblatt Award in 2010?
+   Expected: Michio Sugeno
+   Generated: I'm not sure who received the IEEE Frank Rosenblatt Award in 2010. Can I help you with anything else?
+   Score: D
+
+2. Question: Who was awarded the Oceanography Society's Jerlov Award in 2018?
+   Expected: Annick Bricaud
+   Generated: I don't have information on who was awarded the Oceanography Society's Jerlov Award in 2018. Can I help you with anything else?
+   Score: D
+
+3. Question: What's the name of the women's liberal arts college in Cambridge, Massachusetts?
+   Expected: Radcliffe College
+   Generated: The women's liberal arts college in Cambridge, Massachusetts is Wellesley College.
+   Score: C
+----
+
+The model struggles with specific factual knowledge, often saying it cannot verify information or giving incorrect answers.
+
+== Step 4: Academic Benchmark Evaluation (MMLU)
+
+Let's evaluate on a standardized academic benchmark - https://huggingface.co/datasets/cais/mmlu[MMLU (Massive Multitask Language Understanding),window=_blank] - which tests knowledge across multiple subjects with multiple-choice questions:
+
+[source,sh,role=execute]
+----
+cat << 'EOF' > eval_mmlu.py
+from llama_stack_client import LlamaStackClient
+import pprint
+
+# Connect to Llama Stack
+client = LlamaStackClient(
+    base_url="http://localhost:8321",
+    timeout=600.0
+)
+
+# Get model
+available_models = [
+    model.identifier for model in client.models.list() if model.model_type == "llm"
+]
+model_id = available_models[0]
+
+# Define system prompt for multiple choice questions
+SYSTEM_PROMPT_TEMPLATE = """
+You are an expert in {subject} whose job is to answer multiple choice questions.
+
+First, reason about the correct answer.
+
+Then write the answer in the following format where X is exactly one of A,B,C,D:
+
+Answer: X
+
+Make sure X is one of A,B,C,D.
+
+If you are uncertain of the correct answer, guess the most likely one.
+"""
+
+# Sample MMLU-style questions (normally you'd load from the actual dataset)
+mmlu_sample_rows = [
+    {
+        "input_query": "What is the capital of France?\nA) London\nB) Berlin\nC) Paris\nD) Madrid",
+        "expected_answer": "C",
+        "chat_completion_input": '[{"role": "user", "content": "What is the capital of France?\\nA) London\\nB) Berlin\\nC) Paris\\nD) Madrid"}]'
+    },
+    {
+        "input_query": "Which of the following is a prime number?\nA) 4\nB) 6\nC) 8\nD) 7",
+        "expected_answer": "D",
+        "chat_completion_input": '[{"role": "user", "content": "Which of the following is a prime number?\\nA) 4\\nB) 6\\nC) 8\\nD) 7"}]'
+    },
+    {
+        "input_query": "Who wrote 'Romeo and Juliet'?\nA) Charles Dickens\nB) William Shakespeare\nC) Mark Twain\nD) Jane Austen",
+        "expected_answer": "B",
+        "chat_completion_input": '[{"role": "user", "content": "Who wrote \'Romeo and Juliet\'?\\nA) Charles Dickens\\nB) William Shakespeare\\nC) Mark Twain\\nD) Jane Austen"}]'
+    }
+]
+
+print("📚 MMLU-style multiple choice evaluation:")
+for i, row in enumerate(mmlu_sample_rows):
+    print(f"{i+1}. {row['input_query']}")
+    print(f"   Expected: {row['expected_answer']}")
+
+# Create system message being an expert in Academic Subjects
+system_message = {
+    "role": "system", 
+    "content": SYSTEM_PROMPT_TEMPLATE.format(subject="academic subjects"),
+}
+
+# Register benchmark
+client.benchmarks.register(
+    benchmark_id="meta-reference::mmlu-sample",
+    dataset_id="mmlu-sample", 
+    scoring_functions=[],
+)
+
+# Evaluate with regex parser for multiple choice
+print(f"\n🎯 Evaluating {model_id} on MMLU-style questions...")
+response = client.eval.evaluate_rows(
+    benchmark_id="meta-reference::mmlu-sample",
+    input_rows=mmlu_sample_rows,
+    scoring_functions=["basic::regex_parser_multiple_choice_answer"],
+    benchmark_config={
+        "eval_candidate": {
+            "type": "model",
+            "model": model_id,
+            "sampling_params": {
+                "strategy": {
+                    "type": "top_p",
+                    "temperature": 0.1,
+                    "top_p": 0.95,
+                },
+                "max_tokens": 512,
+            },
+            "system_message": system_message,
+        },
+    },
+)
+
+print("\n📊 MMLU Results:")
+for i, gen in enumerate(response.generations):
+    score = response.scores['basic::regex_parser_multiple_choice_answer'].score_rows[i]
+    print(f"\n{i+1}. Question: {mmlu_sample_rows[i]['input_query'].split('?')[0]}?")
+    print(f"   Expected: {mmlu_sample_rows[i]['expected_answer']}")
+    print(f"   Generated: {gen['generated_answer']}")
+    print(f"   Score: {score['score']}")
+
+# Calculate accuracy
+results = response.scores['basic::regex_parser_multiple_choice_answer']
+if 'accuracy' in results.aggregated_results:
+    accuracy = results.aggregated_results['accuracy']['accuracy']
+    print(f"\n📈 MMLU Accuracy: {accuracy:.1%}")
+EOF
+
+python eval_mmlu.py
+----
+
+Expected output:
+[source, text]
+----
+📊 MMLU Results:
+
+1. Question: What is the capital of France?
+   Expected: C
+   Generated: The correct answer is C) Paris. This can be reasoned by considering geographical knowledge about Europe and its countries. France is a country located in Western Europe, and among all European capitals, Paris is well-known as the capital of France.
+
+Answer: C
+   Score: 1.0
+
+2. Question: Which of the following is a prime number?
+   Expected: D
+   Generated: To determine which option is a prime number, I need to consider what makes a number prime.
+
+A prime number is a positive integer that is divisible only by itself and 1. In other words, it has exactly two distinct factors: 1 and itself.
+
+Let's analyze each option:
+
+* A) 4 can be divided by 2, so it's not prime.
+* B) 6 can be divided by 2 and 3, so it's not prime.
+* C) 8 can be divided by 2 and 4, so it's not prime.
+* D) 7 can only be divided by 1 and itself (7), making it a prime number.
+
+Therefore, the correct answer is:
+
+Answer: D
+   Score: 1.0
+
+3. Question: Who wrote 'Romeo and Juliet'?
+   Expected: B
+   Generated: The play "Romeo and Juliet" is a tragedy written by William Shakespeare, an English playwright and poet who lived in the 16th and 17th centuries. The play is one of his most famous works and tells the story of two young lovers from feuding families.
+
+Answer: B
+   Score: 1.0
+
+📈 MMLU Accuracy: 100.0%
+----
+
+This demonstrates how to evaluate on structured multiple-choice benchmarks using the `regex_parser_multiple_choice_answer` scoring function, which extracts the letter choice from the model's response.
+
+== Summary
+
+In this module, you:
+
+* Installed and configured the `llama-stack-client` for evaluation
+* Ran basic evaluations using `subset_of` scoring and discovered case sensitivity issues
+* Used `llm_as_judge` for semantic evaluation with custom prompts
+* Evaluated models on real datasets like SimpleQA for knowledge testing
+* Tested academic benchmarks with MMLU-style multiple-choice questions
+
+Next, learn how to quickly deploy the complete Llama Stack with all features enabled using xref:advanced-04-all-in-one.adoc[All-in-One Setup].

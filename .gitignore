@@ -40,3 +40,7 @@ yarn.lock
 llama_env
 __pycache__
 *.pem
+
+# Claude
+.claude/
+CLAUDE.md

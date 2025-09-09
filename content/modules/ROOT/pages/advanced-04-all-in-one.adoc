@@ -96,7 +96,3 @@ Once running, you can access:
 * **Web Playground**: http://localhost:8502
 * **Llama Stack API**: http://localhost:8321
 * **Jaeger Telemetry**: http://localhost:16686
-
-== Next Steps
-
-Now that you have the complete stack running, explore the individual tutorials to understand each component in detail, or start experimenting directly in the playground!
