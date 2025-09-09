@@ -13,6 +13,9 @@ This section contains the following intermediate-level module:
 * xref:intermediate-03-safety.adoc[Integrating Llama Guardrails for Content Safety with Llama Stack] +
   Learn how to register Llama Guard models and apply input shields to your agents. You'll explore how to evaluate unsafe and safe prompts, review safety filtering results, and log agent responses securely.
 
+* xref:intermediate-03-telemetry.adoc[Integrating Telemetry in Llama Stack for Tracing, Metrics, and Logging] +
+  Learn how to enable and use the telemetry system built into Llama Stack. You'll explore configuring sinks such as OpenTelemetry, SQLite, and console output, and understand the different types of events (logs, metrics, spans) emitted by the system.
+
 == Next Step
 
 Continue with xref:intermediate-03-safety.adoc[Integrating Llama Guardrails for Content Safety with Llama Stack] to implement content filtering using Llama Guard!
