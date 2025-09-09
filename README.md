@@ -23,16 +23,15 @@ This repository contains hands-on tutorials covering:
 ### 🟡 Elementary  
 - Model Context Protocol (MCP) integration
 - Retrieval Augmented Generation (RAG)
-- Building interactive agents
+- Building interactive agents with ReAct
 
 ### 🟠 Intermediate
-- Safety and content filtering
-- Telemetry and observability
-- Production deployments
+- Safety and content filtering with Llama Guard
+- Telemetry and observability with OpenTelemetry
 
 ### 🔴 Advanced
-- Custom providers and extensions
-- Advanced agent workflows
+- Model evaluation with built-in framework
+- All-in-one deployment setup
 
 ## Access Points
 
