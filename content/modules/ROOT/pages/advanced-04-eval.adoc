@@ -511,4 +511,4 @@ In this module, you:
 * Evaluated models on real datasets like SimpleQA for knowledge testing
 * Tested academic benchmarks with MMLU-style multiple-choice questions
 
-Next, learn how to quickly deploy the complete Llama Stack with all features enabled using xref:advanced-04-all-in-one.adoc[All-in-One Setup].
+Next, explore how to integrate your own agentic framework with xref:advance-04-byo-agent.adoc[Bring Your Own Agentic Framework] or jump to comprehensive deployment with xref:advanced-04-all-in-one.adoc[All-in-One Setup].
