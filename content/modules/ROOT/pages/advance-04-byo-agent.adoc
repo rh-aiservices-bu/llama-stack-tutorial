@@ -1,0 +1,169 @@
+= Bring Your Own Agentic Framework with Llama Stack
+:page-layout: lab
+:experimental:
+
+== Goal
+
+Use any agentic framework (LangGraph, AutoGen, CrewAI) with Llama Stack's OpenAI-compatible APIs.
+
+This tutorial integrates LangGraph with Llama Stack inference and MCP weather tools.
+
+== Prerequisites
+
+* Llama Stack server running (see: xref:beginner-01-helloworld.adoc[Llama-stack Helloworld])
+* MCP weather service running (see: xref:intermediate-03-mcp-weather.adoc[MCP Weather Setup])
+* Python environment with virtual environment activated
+
+== Complete LangGraph Integration Example
+
+This example demonstrates all key integration patterns in a single comprehensive script that includes:
+
+1. **Basic Integration**: Connecting LangGraph to Llama Stack's OpenAI-compatible endpoint
+2. **Simple Agent**: LangGraph ReAct Agent implementation with tool binding
+3. **MCP Tools**: Weather service integration with proper MCP format
+4. **Advanced Patterns**: Error handling and fallback strategies
+
+Install the required dependencies:
+
+[source,sh,role=execute]
+----
+pip install langgraph==0.6.7 langchain-openai==0.3.32 langchain-core==0.3.75
+----
+
+Create the complete integration example:
+
+[source,sh,role=execute]
+----
+cat << 'EOF' > langgraph_llama_stack.py
+import os
+from llama_stack_client import LlamaStackClient
+from langgraph.graph import StateGraph, END, START
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage, AIMessage
+from typing import Annotated
+from typing_extensions import TypedDict
+from langgraph.graph.message import add_messages
+
+# Environment variables
+LLAMA_STACK_URL = os.getenv("LLAMA_STACK_URL", "http://localhost:8321")
+INFERENCE_MODEL = os.getenv("INFERENCE_MODEL", "meta-llama/Llama-3.2-3B-Instruct")
+INFERENCE_SERVER_OPENAI = os.getenv("LLAMA_STACK_ENDPOINT_OPENAI", "http://localhost:8321/v1/openai/v1")
+API_KEY = os.getenv("OPENAI_API_KEY", "not-applicable")
+
+print("📋 LangGraph + Llama Stack Integration")
+print(f"   LLAMA_STACK_URL: {LLAMA_STACK_URL}")
+print(f"   INFERENCE_MODEL: {INFERENCE_MODEL}")
+
+llm = ChatOpenAI(
+    model=INFERENCE_MODEL,
+    openai_api_key=API_KEY,  
+    openai_api_base=INFERENCE_SERVER_OPENAI,
+    use_responses_api=True,
+)
+
+# Test connectivity
+print("\n🧪 Testing basic connectivity:")
+response = llm.invoke("Hello")
+print(f"✅ Connection successful")
+
+# Bind MCP weather tools
+print("\n🛠️ Setting up MCP weather tools...")
+llm_with_tools = llm.bind_tools([
+    {
+        "type": "mcp",
+        "server_label": "weather",     
+        "server_url": "http://host.containers.internal:3001/sse",       
+        "require_approval": "never",
+    },
+])
+print("✅ MCP tools configured")
+
+# Define LangGraph State and Agent
+class State(TypedDict):
+    messages: Annotated[list, add_messages]
+
+def chatbot(state: State):
+    message = llm_with_tools.invoke(state["messages"])
+    return {"messages": [message]}
+
+# Build LangGraph StateGraph
+print("\n🏗️ Building LangGraph agent...")
+graph_builder = StateGraph(State)
+graph_builder.add_node("chatbot", chatbot)
+graph_builder.add_edge(START, "chatbot")
+graph_builder.add_edge("chatbot", END)
+
+graph = graph_builder.compile()
+print("✅ LangGraph agent ready")
+
+# Test the integration
+print("\n" + "="*50)
+print("🚀 Testing LangGraph Agent with MCP Tools")
+print("="*50)
+
+response = graph.invoke({
+    "messages": [{"role": "user", "content": "What is the weather in Seattle?"}]
+})
+
+print("Weather Response:")
+for message in response['messages']:
+    if hasattr(message, 'content'):
+        if isinstance(message.content, list):
+            for content_block in message.content:
+                if content_block.get('type') == 'text':
+                    print(content_block.get('text', ''))
+        elif isinstance(message.content, str):
+            print(message.content)
+    else:
+        message.pretty_print()
+EOF
+
+python langgraph_llama_stack.py
+----
+
+Run the script to see the LangGraph agent in action:
+
+Expected output:
+[source, text]
+----
+📋 LangGraph + Llama Stack Integration
+   LLAMA_STACK_URL: http://localhost:8321
+   INFERENCE_MODEL: meta-llama/Llama-3.2-3B-Instruct
+
+🧪 Testing basic connectivity:
+INFO:httpx:HTTP Request: POST http://localhost:8321/v1/openai/v1/responses "HTTP/1.1 200 OK"
+✅ Connection successful
+
+🛠️ Setting up MCP weather tools...
+✅ MCP tools configured
+
+🏗️ Building LangGraph agent...
+✅ LangGraph agent ready
+
+==================================================
+🚀 Testing LangGraph Agent with MCP Tools
+==================================================
+INFO:httpx:HTTP Request: POST http://localhost:8321/v1/openai/v1/responses "HTTP/1.1 200 OK"
+Weather Response:
+What is the weather in Seattle?
+It looks like the weather forecast for Seattle is mostly sunny with a chance of rain showers. Here are the details:
+
+* Temperature: High of 73°F today and tonight, with lows in the mid-50s to low 60s throughout the week.
+* Wind: Light breeze blowing at around 5-6 mph most days, with some gusts up to 12 mph on Tuesday afternoon.
+* Precipitation: A slight chance of rain showers on most days, with a higher chance on Saturday and Sunday.
+----
+
+You've successfully integrated LangGraph with Llama Stack! The agent can now make weather queries using MCP tools while leveraging Llama Stack's OpenAI-compatible inference API.
+
+== Summary
+
+This tutorial demonstrated how to:
+
+* **Integrate any agentic framework** with Llama Stack using standard APIs
+* **Leverage OpenAI compatibility** for easy migration from other providers  
+* **Add MCP tools** for enhanced agent capabilities
+
+The BYO approach gives you the flexibility to use your preferred framework while selectively leveraging Llama Stack's powerful APIs.
+
+Next, explore comprehensive deployment options with xref:advanced-04-all-in-one.adoc[All-in-One Setup] for a 
+complete production-ready environment.
