@@ -8,8 +8,6 @@ Use any agentic framework (LangGraph, AutoGen, CrewAI) with Llama Stack's OpenAI
 
 This tutorial integrates LangGraph with Llama Stack inference and MCP weather tools.
 
-NOTE: We use `http://localhost:8321/v1/openai/v1/` instead of the standard `http://localhost:8321/` because we're leveraging Llama Stack's OpenAI-compatible endpoint for seamless integration with existing OpenAI-based frameworks.
-
 == Prerequisites
 
 * Llama Stack server running (see: xref:beginner-01-helloworld.adoc[Llama-stack Helloworld])
@@ -121,6 +119,11 @@ EOF
 
 python langgraph_llama_stack.py
 ----
+
+NOTE: We use `http://localhost:8321/v1/openai/v1/` instead of the 
+standard `http://localhost:8321/` because we're leveraging 
+Llama Stack's OpenAI-compatible endpoint for seamless 
+integration with existing OpenAI-based frameworks.
 
 When you run the script, you should see output similar to this:
 
