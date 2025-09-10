@@ -8,6 +8,8 @@ Use any agentic framework (LangGraph, AutoGen, CrewAI) with Llama Stack's OpenAI
 
 This tutorial integrates LangGraph with Llama Stack inference and MCP weather tools.
 
+NOTE: We use `http://localhost:8321/v1/openai/v1/` instead of the standard `http://localhost:8321/` because we're leveraging Llama Stack's OpenAI-compatible endpoint for seamless integration with existing OpenAI-based frameworks.
+
 == Prerequisites
 
 * Llama Stack server running (see: xref:beginner-01-helloworld.adoc[Llama-stack Helloworld])
@@ -45,13 +47,12 @@ from typing_extensions import TypedDict
 from langgraph.graph.message import add_messages
 
 # Environment variables
-LLAMA_STACK_URL = os.getenv("LLAMA_STACK_URL", "http://localhost:8321")
 INFERENCE_MODEL = os.getenv("INFERENCE_MODEL", "meta-llama/Llama-3.2-3B-Instruct")
 INFERENCE_SERVER_OPENAI = os.getenv("LLAMA_STACK_ENDPOINT_OPENAI", "http://localhost:8321/v1/openai/v1")
 API_KEY = os.getenv("OPENAI_API_KEY", "not-applicable")
 
 print("📋 LangGraph + Llama Stack Integration")
-print(f"   LLAMA_STACK_URL: {LLAMA_STACK_URL}")
+print(f"   LLAMA_STACK_URL: {INFERENCE_SERVER_OPENAI}")
 print(f"   INFERENCE_MODEL: {INFERENCE_MODEL}")
 
 llm = ChatOpenAI(
@@ -126,7 +127,7 @@ When you run the script, you should see output similar to this:
 [source, text]
 ----
 📋 LangGraph + Llama Stack Integration
-   LLAMA_STACK_URL: http://localhost:8321
+   LLAMA_STACK_URL: http://localhost:8321/v1/openai/v1/ (OpenAI-compatible endpoint)
    INFERENCE_MODEL: meta-llama/Llama-3.2-3B-Instruct
 
 🧪 Testing basic connectivity:
