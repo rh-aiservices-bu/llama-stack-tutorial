@@ -30,7 +30,7 @@ Install the required dependencies:
 pip install langgraph==0.6.7 langchain-openai==0.3.32 langchain-core==0.3.75
 ----
 
-Create the complete integration example:
+This is a complete integration example. Run the script to see the LangGraph agent in action!
 
 [source,sh,role=execute]
 ----
@@ -121,9 +121,8 @@ EOF
 python langgraph_llama_stack.py
 ----
 
-Run the script to see the LangGraph agent in action:
+When you run the script, you should see output similar to this:
 
-Expected output:
 [source, text]
 ----
 📋 LangGraph + Llama Stack Integration
